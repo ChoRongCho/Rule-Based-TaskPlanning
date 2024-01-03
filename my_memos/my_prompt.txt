@@ -1,0 +1,2 @@
+This image is an object before it is pressed.
+This image is an object after it is pressed. Dose the object have rigidity?

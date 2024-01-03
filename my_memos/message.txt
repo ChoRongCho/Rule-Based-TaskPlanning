@@ -1,0 +1,12 @@
+This is a set of 1d object shape. {linear, circle, twisted}
+This is a set of 2d object shape. {circle, triangle, square, star, crescent, rectangle, pentagon, hexagon, octagon, cross, trapezoid, rhombus, arrow, oval, heart, parallelogram}.
+This is a set of 3d object shape. {sphere, pyramid, triangular_prism, cone, cube, cuboid, cylinder, ellipse}. You must answer in a given category that makes logit maximum. No other answer is permitted.
+what is the shape of this object?
+1d-linear
+what is the shape of this object?
+2d-triangle
+what is the shape of this object?
+3d-cube
+what is the shape of this object?
+3d-triangular_prism.
+what is the shape of this object?

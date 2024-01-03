@@ -1,0 +1,45 @@
+{
+  "name": "shape detector",
+  "description": "you are making a decision what object looks like.",
+  "instruction": "you are making a decision what object looks like.",
+  "prompt": [
+    {
+      "index" : 0,
+      "role": "user",
+      "content": "This is a set of 1d object shape. {linear, circle, twisted}.",
+      "image_path": ""
+    },
+    {
+      "index": 1,
+      "role": "user",
+      "content": "This is a set of 2d object shape. {circle, triangle, square, star, crescent, rectangle, pentagon, hexagon, octagon, cross, trapezoid, rhombus, arrow, oval, heart, parallelogram}.",
+      "image_path": false
+    },
+    {
+      "index": 2,
+      "role": "user",
+      "content": "This is a set of 3d object shape. {sphere, pyramid, triangular_prism, cone, cube, cuboid, cylinder, ellipse}.",
+      "image_path": false
+    },
+    {
+      "index": 3,
+      "role": "user",
+      "content": "You must answer in a given category that makes logit maximum. No other answer is permitted.",
+      "image_path": false
+    },
+    {
+      "index": 4,
+      "role": "assistant",
+      "content": "",
+      "image_path": false
+    }
+
+  ],
+
+  "setting":
+    {
+      "max_token": 200,
+      "model": "gpt-4-vision-preview",
+      "api_key" : "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"
+    }
+}

@@ -1,0 +1,22 @@
+I want to do bin packing with various unknown objects and their properties such as deformablity or flexibility. Tell me the five useful object's properties for bin packing.
+
+밧줄
+https://img.freepik.com/premium-photo/ropes-string_9083-11014.jpg?w=1060
+The object in the image is a rope, which can be described as (linear-1D).
+
+쿠션
+https://m.cushionmarket.com/web/product/big/201806/382_shop1_15281897772409.jpg
+(square-3D)
+https://image.store.bemypet.kr/content/uploads/2022/02/03155352/IMG_5887.png
+(round-3D)
+
+종이
+https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Endlospapier.jpg/210px-Endlospapier.jpg
+(rectangular-2D)
+
+옷
+https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTARM021q-UgVr7q6wHCGLni-fHDOlxj6edjQ&usqp=CAU
+flat-2D
+
+두루마 휴지
+https://www.outdoornews.co.kr/news/photo/202209/33586_96093_747.jpg

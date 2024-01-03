@@ -1,0 +1,5 @@
+Soft body can be pressed in the bin.
+Flexible objects may be folded when packed.
+Fragile objects must be on the soft body like cushion.
+You must not press a rigid object.
+You must not fold or twist a rigid object.

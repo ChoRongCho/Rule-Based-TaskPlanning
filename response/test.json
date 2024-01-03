@@ -1,0 +1,16 @@
+{
+    "prompt": [
+        {
+            "index": 3,
+            "role": "user",
+            "content": "hi",
+            "image_path": false
+        },
+        {
+            "index": 2,
+            "role": "system",
+            "content": "hi there",
+            "image_path": false
+        }
+    ]
+}
