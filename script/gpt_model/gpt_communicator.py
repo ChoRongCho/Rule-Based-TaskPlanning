@@ -7,15 +7,19 @@ from openai import OpenAI
 class GPT4:
     def __init__(self,
                  api_json_path: str,
-                 prompt_file_path: str,
+                 prompt_json_path: str,
                  max_token: int = 100):
         self.api_json_path = api_json_path
-        self.prompt_file_path = prompt_file_path
+        self.prompt_json_path = prompt_json_path
         self.max_token = max_token
 
         self.api_key = self.get_api_key()
         self.message = []
-        self.message_file = open(self.prompt_file_path, "r")
+        self.message_file = open(self.prompt_json_path, "r")
+
+    def read_json(self):
+        with open(self.prompt_json_path, "r") as file:
+            vision_data = json.load(file)
 
     def get_api_key(self):
         with open(self.api_json_path, "r") as file:
@@ -44,8 +48,8 @@ class GPT4:
 
 
 class GPT4Vision(GPT4):
-    def __init__(self, api_json_path, prompt_file_path, max_token=100):
-        super().__init__(api_json_path, prompt_file_path, max_token)
+    def __init__(self, api_json_path, prompt_json_path, max_token=100):
+        super().__init__(api_json_path, prompt_json_path, max_token)
 
     @staticmethod
     def encode_image(image_path):
@@ -97,8 +101,8 @@ class GPT4Vision(GPT4):
 
 
 class GPT4Text(GPT4):
-    def __init__(self, api_json_path, prompt_file_path, max_token=100):
-        super().__init__(api_json_path, prompt_file_path, max_token)
+    def __init__(self, api_json_path, prompt_json_path, max_token=100):
+        super().__init__(api_json_path, prompt_json_path, max_token)
 
     def add_message(self, role="user"):
         prompt = self.get_prompt()

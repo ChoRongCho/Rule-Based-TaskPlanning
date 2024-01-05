@@ -28,5 +28,5 @@ class PDDL:
         pass
 
     def generate_domain(self, old_pddl, state):
-        return "domain.pddl"
+        return "test1_domain.pddl"
 
