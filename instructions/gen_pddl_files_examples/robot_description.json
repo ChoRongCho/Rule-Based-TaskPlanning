@@ -1,0 +1,12 @@
+{
+  "name": "UR5",
+  "purpose": "",
+  "actions":
+    {
+      "push": "describe this action",
+      "place": "describe this action",
+      "pick": "describe this action",
+      "fold": "describe this action",
+      "base": "describe this action"
+    }
+}

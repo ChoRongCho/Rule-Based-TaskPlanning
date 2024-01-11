@@ -8,7 +8,7 @@ from openai import OpenAI
 class GPTInterpreter:
     def __init__(self,
                  api_json: str,
-                 prompt_json: str,
+                 prompt_json: str or bool,
                  save_path: str or bool = False):
 
         self.save_path = save_path
@@ -28,12 +28,20 @@ class GPTInterpreter:
 
     def get_api_key(self):
         with open(self.api_json, "r") as file:
-            self.setting = json.load(file)["setting"]
-            api_key = self.setting["api_key"]
+            setting = json.load(file)
+
+            self.setting = setting["setting_vision"]
+            api_key = setting["api_key"]
             file.close()
+
             return api_key
 
     def get_prompt(self):
+        """
+        integrated prompt using json file
+
+        :return: name, description, instruction, prompt
+        """
         with open(self.prompt_json) as file:
             data = json.load(file)
             name = data["name"]
@@ -53,11 +61,11 @@ class GPTInterpreter:
                 encoded_image = self.encode_image(image_path)
                 content = [{"type": "text", "text": content_text},
                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}}]
-                content = {"role": role, "content": content}
+                prompt = {"role": role, "content": content}
 
             else:
-                content = {"role": role, "content": content_text}
-            self.message.append(content)
+                prompt = {"role": role, "content": content_text}
+            self.message.append(prompt)
 
     def log_answer(self, answer):
         # question = self.message[-1]["content"]
@@ -68,7 +76,7 @@ class GPTInterpreter:
             f.write(json_object)
             f.close()
 
-    def run(self):
+    def run_json_prompt(self):
         client = OpenAI(api_key=self.api_key)
         self.add_message()
 
@@ -84,3 +92,35 @@ class GPTInterpreter:
         if self.save_path:
             self.log_answer(answer=answer)
 
+    def add_text_message_manual(self, role, content):
+        """
+        manual prompt
+        """
+        prompt = {"role": role, "content": content}
+        self.message.append(prompt)
+
+    def run_manual_prompt(self):
+        """
+        after add_text_message_manual do run_manual_prompt
+        for example:
+
+        gpt4 = GPTInterpreter(...)
+        gpt4.add_text_message_manual(role1, content1)
+        gpt4.add_text_message_manual(role2, content2)
+        ...
+        gpt4.run_manual_prompt()
+        """
+
+        client = OpenAI(api_key=self.api_key)
+        # self.add_message_manual()
+        response = client.chat.completions.create(
+            model=self.setting["model"],
+            messages=self.message,
+            max_tokens=self.setting["max_token"],
+            temperature=self.setting["temperature"],
+            top_p=self.setting["top_p"]
+        )
+        answer = response.choices[0].message.content
+
+        if self.save_path:
+            self.log_answer(answer=answer)

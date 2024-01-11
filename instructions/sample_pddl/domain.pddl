@@ -8,7 +8,7 @@
     out_bin, bin - place 
     robot 
     item - object
-    soft, fragile, flexible, rigid - property
+    soft, fragile, flexible, rigid - property ;object property predicates
 )
 
 (:predicates ;todo: define predicates here
