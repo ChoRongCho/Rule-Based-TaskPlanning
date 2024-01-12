@@ -42,6 +42,7 @@ class GPT4:
     def get_instruction(self):
         pass
 
+
 class GPT4Vision(GPT4):
     def __init__(self, api_json_path, prompt_file_path, max_token=100):
         super().__init__(api_json_path, prompt_file_path, max_token)

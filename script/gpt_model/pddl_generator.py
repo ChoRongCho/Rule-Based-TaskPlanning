@@ -1,22 +1,9 @@
 import json
 import os
-import random
 from dataclasses import dataclass
 from typing import List
-from gpt_prompt import GPTInterpreter
-
-import numpy as np
-import torch
-
-
-def seed_all_types(seed: int = 42):
-    random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+from .gpt_prompt import GPTInterpreter
+from ..utils.utils import create_folder
 
 
 @dataclass
@@ -37,9 +24,18 @@ class PDDL:
         3. problem_pddl: if None, make a new problem.pddl file from instruction, else, modifying problem.pddl
         4. human instruction: common sense
 
-        get predicates + (human_instruction + action set) + (domain.pddl + problem.pddl) => new domain or problem.pddl
+        (task description + get predicates) 
+        + (human_instruction + action set) 
+        + (domain.pddl + problem.pddl) => new domain or problem.pddl
 
-
+        needed args
+        1. name
+        2. result_dir for save a prompt and its answer.
+        3. data_dir for get prompts
+        4. task
+        5. api_json
+        6. prompt_json : false if used manual prompt
+        7. domain, problem: True or False
         """
         # basic
         self.args = args
@@ -47,25 +43,24 @@ class PDDL:
 
         # utils
         self.name = args.name
-        self.save_path = args.save_path
+        self.result_dir = os.path.join(args.result_dir, args.name)
+        create_folder(self.result_dir)
 
         # task definition
         self.task = args.task
 
         # GPT Client
-        self.gpt4 = GPTInterpreter(api_json=self.args.api_json,
-                                   prompt_json=self.args.prompt_json,
-                                   save_path=self.args.save_path)
+        self.gpt4 = GPTInterpreter(api_json=args.api_json,
+                                   prompt_json=args.prompt_json,
+                                   result_dir=self.result_dir)
 
         # robot
         self.robot = Robot()
         self.get_robot_information()
 
         # pddl
-        self.domain = self.args.domain  # ture or false
-        self.problem = self.args.problem  # ture or false
-        self.domain_prompt = self.get_example_pddl(self.domain)
-        self.problem_prompt = self.get_example_pddl(self.problem)
+        self.domain_prompt = self.get_example_pddl("domain")
+        self.problem_prompt = self.get_example_pddl("problem")
 
         # human instruction
         self.human_instruction = self.get_human_instruction()
@@ -84,7 +79,7 @@ class PDDL:
         """
         if self.task == "bin_packing" or self.task == 0:
             task = "bin_packing"
-            robot_json_path = os.path.join(self.args.path, task, "robot_description.json")
+            robot_json_path = os.path.join(self.args.data_dir, self.name, "robot_description.json")
             with open(robot_json_path, "r") as robot_json_file:
                 robot_info = json.load(robot_json_file)
                 try:
@@ -102,7 +97,7 @@ class PDDL:
         #     pass
 
         else:
-            raise ValueError("task Error: 0: Bin_Packing")
+            raise ValueError("Task Error: 0: Bin_Packing")
 
     def get_human_instruction(self) -> str:
         """
@@ -111,7 +106,7 @@ class PDDL:
         """
         if self.task == "bin_packing" or self.task == 0:
             task = "bin_packing"
-            hi_json_path = os.path.join(self.args.path, task, "instructions.json")
+            hi_json_path = os.path.join(self.args.data_dir, self.name, "instruction.json")
             with open(hi_json_path, "r") as hi_json_file:
                 hi_info = json.load(hi_json_file)
                 content_list = []
@@ -119,12 +114,12 @@ class PDDL:
                     # add get info code
                     human_prompt = sorted(hi_info["prompt"], key=lambda x: x['index'])
                     for i in range(len(human_prompt)):
-                        content_text = human_prompt[i]["content"]
+                        content_text = human_prompt[i]["content"] + "\n"
                         content_list.append(content_text)
                     content = "".join(content_list)
-                    print("\n\n---- Human Instruction ----")
-                    print(content)
-                    print("---- Human Instruction ----\n\n")
+                    # print("\n\n---- Human Instruction ----")
+                    # print(content)
+                    # print("---- Human Instruction ----\n\n")
                 except:
                     raise KeyError("There is no content.")
 
@@ -136,7 +131,7 @@ class PDDL:
         #     pass
 
         else:
-            raise ValueError("task Error: 0: Bin_Packing")
+            raise ValueError("Task Error: 0: Bin_Packing")
 
     def get_example_pddl(self, pddl: str = "domain") -> List or bool:
         """
@@ -148,19 +143,19 @@ class PDDL:
         if self.task == "bin_packing" or self.task == 0:
             task = "bin_packing"
         else:
-            raise ValueError("task Error: 0: Bin_Packing")
+            raise ValueError("Task Error: 0: Bin_Packing")
 
         if pddl.lower() == "domain":
-            if self.domain:
-                pddl_path = os.path.join(self.args.path, task, "domain.pddl")
+            if self.args.domain:
+                pddl_path = os.path.join(self.args.data_dir, self.name, "domain.pddl")
                 content = self.pddl_format(pddl_path, json_key="answer")
 
             else:
                 content = False
 
         elif pddl.lower() == "problem":
-            if self.problem:
-                pddl_path = os.path.join(self.args.path, task, "problem.pddl")
+            if self.args.problem:
+                pddl_path = os.path.join(self.args.data_dir, task, "problem.pddl")
                 content = self.pddl_format(pddl_path, json_key="answer")
             else:
                 content = False
@@ -232,12 +227,11 @@ class PDDL:
             # Add Human instruction, message reset
             message = "Now, I'm going to talk about precautions when doing bin packing. \n"
             message += self.human_instruction
-            message += " \n"
 
             # Add actions when making actions
             message += "The actions I can do are "
-            for action in self.robot.actions:
-                if action == self.robot.actions[-1]:
+            for action in list(self.robot.actions.keys()):
+                if action == list(self.robot.actions.keys())[-1]:
                     message += "and " + action + ". \n"
                 else:
                     message += action + ", "
@@ -247,7 +241,7 @@ class PDDL:
             """ ----------------------------------- """
             # Add example pddl if it existed, message reset
             if self.problem_prompt:
-                message = "Here is an example of a problem.pddl. \n"
+                message += "Here is an example of a problem.pddl. \n"
                 message += self.problem_prompt
                 message += " \n" + \
                            "The initial state and goal state will be given like this. \n"
@@ -256,27 +250,39 @@ class PDDL:
                 message += "Here is an example of a domain.pddl. \n"
                 message += self.domain_prompt
                 message += " \n" + \
-                    "Refer to this pddl and make a new domain.pddl "
+                    "Refer this pddl and modify this domain.pddl \n"
+            message += "Please generate the only pddl part without any description."
             self.prompt_pddl = message
-
-    def save_prompt(self):
-        save_path = os.path.join(self.save_path, self.name + "prompt.json")
+        
+        else:
+            raise ValueError("Task Error: 0: Bin_Packing")
+        
+    def log_prompt(self):
+        result_dir_json = os.path.join(self.result_dir, self.name + "_prompt.json")
+        result_dir_txt = os.path.join(self.result_dir, self.name + "_prompt.txt")
         data = {"name": self.name,
                 "prompt": {
                     "predicates": self.prompt_predicates,
                     "instruction": self.prompt_instruction,
                     "pddl": self.prompt_pddl,
+                    }
                 }
-                }
-        with open(save_path, "w") as save_file:
-            json.dump(data, save_file, indent=4)
+        json_object = json.dumps(data, indent=4)
+        with open(result_dir_txt, "w") as save_file:
+            save_file.write("--Predicate Prompt--\n" + self.prompt_predicates +
+                            "\n\n--Instruction Prompt--\n" + self.prompt_instruction)
+            save_file.close()
+
+        with open(result_dir_json, "w") as save_file:
+            save_file.write(json_object)
+            save_file.close()
 
     def run(self):
         self.prompt_encoding()
-        self.save_prompt()
+        self.log_prompt()
 
         self.gpt4.add_text_message_manual(role="user", content=self.prompt_predicates)
         self.gpt4.add_text_message_manual(role="user", content=self.prompt_instruction)
         self.gpt4.add_text_message_manual(role="user", content=self.prompt_pddl)
 
-        self.gpt4.run_manual_prompt()
+        self.gpt4.run_manual_prompt(name=self.args.name, is_save=True)

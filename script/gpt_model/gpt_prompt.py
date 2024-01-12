@@ -9,9 +9,9 @@ class GPTInterpreter:
     def __init__(self,
                  api_json: str,
                  prompt_json: str or bool,
-                 save_path: str or bool = False):
+                 result_dir: str or bool = False):
 
-        self.save_path = save_path
+        self.result_dir = result_dir
         self.api_json = api_json
         self.prompt_json = prompt_json
 
@@ -42,14 +42,17 @@ class GPTInterpreter:
 
         :return: name, description, instruction, prompt
         """
-        with open(self.prompt_json) as file:
-            data = json.load(file)
-            name = data["name"]
-            description = data["description"]
-            instruction = data["instruction"]
-            prompt = data["prompt"]
-            file.close()
-            return name, description, instruction, prompt
+        try:
+            with open(self.prompt_json) as file:
+                data = json.load(file)
+                name = data["name"]
+                description = data["description"]
+                instruction = data["instruction"]
+                prompt = data["prompt"]
+                file.close()
+                return name, description, instruction, prompt
+        except:
+            return "", "", "", ""
 
     def add_message(self):
         sorted_prompt = sorted(self.prompt, key=lambda x: x['index'])
@@ -67,13 +70,19 @@ class GPTInterpreter:
                 prompt = {"role": role, "content": content_text}
             self.message.append(prompt)
 
-    def log_answer(self, answer):
+    def log_answer(self, answer, name=""):
         # question = self.message[-1]["content"]
+        result_dir_json = os.path.join(self.result_dir, name + "_result.json")
+        result_dir_txt = os.path.join(self.result_dir, name + "_result.pddl")
 
-        json_object = {"answer": answer}
+        json_object = {"name": name, "answer": answer}
         json_object = json.dumps(json_object, indent=4)
-        with open(self.save_path, "w") as f:
+        with open(result_dir_json, "w") as f:
             f.write(json_object)
+            f.close()
+
+        with open(result_dir_txt, "w") as f:
+            f.write(answer)
             f.close()
 
     def run_json_prompt(self):
@@ -89,7 +98,7 @@ class GPTInterpreter:
         )
         answer = response.choices[0].message.content
 
-        if self.save_path:
+        if self.result_dir:
             self.log_answer(answer=answer)
 
     def add_text_message_manual(self, role, content):
@@ -99,7 +108,7 @@ class GPTInterpreter:
         prompt = {"role": role, "content": content}
         self.message.append(prompt)
 
-    def run_manual_prompt(self):
+    def run_manual_prompt(self, name, is_save=False):
         """
         after add_text_message_manual do run_manual_prompt
         for example:
@@ -122,5 +131,5 @@ class GPTInterpreter:
         )
         answer = response.choices[0].message.content
 
-        if self.save_path:
-            self.log_answer(answer=answer)
+        if is_save:
+            self.log_answer(answer=answer, name=name)

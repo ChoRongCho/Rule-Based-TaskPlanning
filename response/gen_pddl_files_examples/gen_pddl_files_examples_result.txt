@@ -1,0 +1,31 @@
+(define (domain packing)
+  (:requirements :strips :typing :conditional-effects)
+  (:types
+    item robot bin out_bin - object
+    soft fragile flexible rigid - property
+  )
+  (:predicates
+    (is-empty ?bin - bin)
+    (hand-empty ?robot - robot)
+    (is-soft ?item - item)
+    (is-fragile ?item - item)
+    (is-flexible ?item - item)
+    (is-rigid ?item - item)
+    (is-deformable ?item - item)
+    (in-bin ?item - item)
+    (out-of-bin ?item - item)
+    (on-top ?i1 ?i2 - item)
+  )
+  (:action pick
+    :parameters (?robot - robot ?item - item ?bin - bin)
+    :precondition (and (hand-empty ?robot) (in-bin ?item))
+    :effect (and (hand-empty ?robot) (out-of-bin ?item))
+  )
+  (:action place
+    :parameters (?robot - robot ?item - item ?bin - bin)
+    :precondition (and (hand-empty ?robot) (out-of-bin ?item))
+    :effect (and (not (hand-empty ?robot)) (in-bin ?item))
+  )
+  (:action fold
+    :parameters (?robot - robot ?item - item)
+    :precondition (and (hand-empty ?robot) (is
