@@ -5,7 +5,7 @@
     {
       "index" : 0,
       "role": "user",
-      "content": "During packing the objects, I want to follow several rules. First, put a fragile object on top of a soft object to prevent breaking the fragile object.",
+      "content": "During packing the objects, I must follow several rules. First, put a fragile object on top of a soft object to prevent breaking the fragile object.",
       "image_path": false
     },
     {

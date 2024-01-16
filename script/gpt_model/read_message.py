@@ -12,7 +12,7 @@ def get_api_key(json_file):
     return api_key, data
 
 
-api_key, _ = get_api_key(json_file="../../instructions/vision_prompt.json")
+api_key, _ = get_api_key(json_file="../../vision_prompt.json")
 client = OpenAI(api_key=api_key)
 response = client.chat.completions.create(
     model="gpt-4.0",

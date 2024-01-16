@@ -9,11 +9,13 @@ class GPTInterpreter:
     def __init__(self,
                  api_json: str,
                  prompt_json: str or bool,
-                 result_dir: str or bool = False):
+                 result_dir: str or bool = False,
+                 version: str = "vision"):
 
         self.result_dir = result_dir
         self.api_json = api_json
         self.prompt_json = prompt_json
+        self.version = version
 
         self.setting = {}
         self.api_key = self.get_api_key()
@@ -30,7 +32,12 @@ class GPTInterpreter:
         with open(self.api_json, "r") as file:
             setting = json.load(file)
 
-            self.setting = setting["setting_vision"]
+            if self.version.lower() == "vision":
+                self.setting = setting["setting_vision"]
+            elif self.version.lower() == "pddl":
+                self.setting = setting["setting_pddl"]
+            else:
+                raise KeyError("setting version must be a vision or a pddl.")
             api_key = setting["api_key"]
             file.close()
 

@@ -19,7 +19,6 @@ from script.utils.utils import parse_args, seed_all_types
 def main():
     args = parse_args()
     seed_all_types(args.seed)
-
     predicates = ["flexible", "rigid", "soft", "fragile"]
     pddl_gen = PDDL(args=args, predicates=predicates)
     pddl_gen.run()

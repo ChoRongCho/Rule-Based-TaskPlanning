@@ -3,13 +3,21 @@ import os
 from dataclasses import dataclass
 from typing import List
 from .gpt_prompt import GPTInterpreter
-from ..utils.utils import create_folder
+from ..utils.utils import create_folder, TaskError, RobotKeyError, JsonFileContentError
+
+
+task_number_table = {
+    0: "bin_packing",
+    1: "hanoi",
+    2: "blocksworld",
+    3: "cooking"
+}
 
 
 @dataclass
 class Robot:
     name: str = "UR5"
-    purpose: str = None
+    goal: str = None
     actions: dict = None
 
 
@@ -40,6 +48,7 @@ class PDDL:
         # basic
         self.args = args
         self.predicates = predicates
+        self.task_number_table = task_number_table
 
         # utils
         self.name = args.name
@@ -52,7 +61,8 @@ class PDDL:
         # GPT Client
         self.gpt4 = GPTInterpreter(api_json=args.api_json,
                                    prompt_json=args.prompt_json,
-                                   result_dir=self.result_dir)
+                                   result_dir=self.result_dir,
+                                   version="pddl")
 
         # robot
         self.robot = Robot()
@@ -72,79 +82,54 @@ class PDDL:
 
         self.message = []
 
-    def get_robot_information(self) -> Robot:
+    def get_robot_information(self):
         """
 
         :return:
         """
-        if self.task == "bin_packing" or self.task == 0:
-            task = "bin_packing"
-            robot_json_path = os.path.join(self.args.data_dir, self.name, "robot_description.json")
+        robot_json_path = os.path.join(self.args.data_dir, self.name, "robot_description.json")
+        try:
             with open(robot_json_path, "r") as robot_json_file:
                 robot_info = json.load(robot_json_file)
                 try:
                     # save robot information
                     self.robot.name = robot_info["name"]
-                    self.robot.purpose = robot_info["purpose"]
+                    self.robot.goal = robot_info["goal"]
                     self.robot.actions = robot_info["actions"]
                 except:
-                    raise KeyError("Three below were not met: name, purpose, actions.")
-
+                    raise RobotKeyError(robot=self.robot)
             robot_json_file.close()
-
-        # add your new task
-        # elif task == "" or task == 1:
-        #     pass
-
-        else:
-            raise ValueError("Task Error: 0: Bin_Packing")
+        except:
+            raise FileNotFoundError(f"There is no file in {robot_json_path}")
 
     def get_human_instruction(self) -> str:
         """
 
         :return:
         """
-        if self.task == "bin_packing" or self.task == 0:
-            task = "bin_packing"
-            hi_json_path = os.path.join(self.args.data_dir, self.name, "instruction.json")
-            with open(hi_json_path, "r") as hi_json_file:
-                hi_info = json.load(hi_json_file)
-                content_list = []
-                try:
-                    # add get info code
-                    human_prompt = sorted(hi_info["prompt"], key=lambda x: x['index'])
-                    for i in range(len(human_prompt)):
-                        content_text = human_prompt[i]["content"] + "\n"
-                        content_list.append(content_text)
-                    content = "".join(content_list)
-                    # print("\n\n---- Human Instruction ----")
-                    # print(content)
-                    # print("---- Human Instruction ----\n\n")
-                except:
-                    raise KeyError("There is no content.")
+        # if self.task == "bin_packing" or self.task == 0:
+        task = "bin_packing"
+        hi_json_path = os.path.join(self.args.data_dir, self.name, "instruction.json")
+        with open(hi_json_path, "r") as hi_json_file:
+            hi_info = json.load(hi_json_file)
+            content_list = []
+            try:
+                # add get info code
+                human_prompt = sorted(hi_info["prompt"], key=lambda x: x['index'])
+                for i in range(len(human_prompt)):
+                    content_text = human_prompt[i]["content"] + "\n"
+                    content_list.append(content_text)
+                content = "".join(content_list)
+                # print("\n\n---- Human Instruction ----")
+                # print(content)
+                # print("---- Human Instruction ----\n\n")
+            except:
+                raise JsonFileContentError
 
-            hi_json_file.close()
-            return content
-
-        # add your new task
-        # elif task == "" or task == 1:
-        #     pass
-
-        else:
-            raise ValueError("Task Error: 0: Bin_Packing")
+        hi_json_file.close()
+        return content
 
     def get_example_pddl(self, pddl: str = "domain") -> List or bool:
-        """
-
-
-        :param pddl:
-        :return:
-        """
-        if self.task == "bin_packing" or self.task == 0:
-            task = "bin_packing"
-        else:
-            raise ValueError("Task Error: 0: Bin_Packing")
-
         if pddl.lower() == "domain":
             if self.args.domain:
                 pddl_path = os.path.join(self.args.data_dir, self.name, "domain.pddl")
@@ -155,7 +140,7 @@ class PDDL:
 
         elif pddl.lower() == "problem":
             if self.args.problem:
-                pddl_path = os.path.join(self.args.data_dir, task, "problem.pddl")
+                pddl_path = os.path.join(self.args.data_dir, self.name, "problem.pddl")
                 content = self.pddl_format(pddl_path, json_key="answer")
             else:
                 content = False
@@ -187,28 +172,20 @@ class PDDL:
         return content
 
     def prompt_encoding(self):
-        """
-        make a prompt
-        1. self.prompt_predicates: task_description + predicates
-        2. self.prompt_instruction: human_instruction + given action set
-        3. self.prompt_pddl: example pddl if existed
-
-        :return: total prompt
-        """
-        """ ----------------------------------- """
-        # Added instruction
-        if self.task == "bin_packing" or 0:
-            task = "bin packing"
-
-            # Intro, inform GPT what will do.
-            message = f"Hi, my name is {self.robot.name}, and I am a robot. \n"
-            message += f"Our goal is to pack a set of objects into a box, which is called {task}. " + \
-                       "In a problem instance, there is a box, a manipulator robot(it's me!), and objects set. \n"
-
+        self.intro_encoding()
+        self.human_instruction_encoding()
+        self.pddl_instruction_encoding()
+        
+    def intro_encoding(self):
+        message = f"Hi, my name is {self.robot.name}, and I am a robot. \n"
+        # Intro, inform GPT what will do.
+        if self.task == 0 or "bin_packing":
+            message += f"Our goal is {self.robot.goal}, which is called {self.task}. " + \
+                       "In a problem instance, there is a box, a manipulator robot(it's me!), and objects set. \n" + \
+                       f"I want to define a domain name as {self.task}."
             # Add predicates
             if len(self.predicates) == 0:
-                message += "Actions must consider the predicates in preconditions and effects. \n"
-
+                message += "Given this goal, I want to make a domain.pddl. \n"
             else:
                 message += "We want to consider physical properties of the objects such as "
                 for predicate in self.predicates:
@@ -216,47 +193,83 @@ class PDDL:
                         message += "and " + predicate + ". \n"
                     else:
                         message += predicate + ", "
-
                 message += "Given this goal, I want to make a domain.pddl" + \
                            " considering the physical properties of the objects. " + \
-                           f"The domain file is supposed to include predicates such as is_{self.predicates[0]}. " + \
-                           "Actions must consider the predicates in preconditions and effects. \n"
-            self.prompt_predicates = message
+                           f"The domain file is supposed to include predicates such as is_{self.predicates[0]}. "
 
-            """ ----------------------------------- """
-            # Add Human instruction, message reset
-            message = "Now, I'm going to talk about precautions when doing bin packing. \n"
-            message += self.human_instruction
+            message += "Actions must consider the predicates in preconditions and effects. \n"
 
-            # Add actions when making actions
-            message += "The actions I can do are "
-            for action in list(self.robot.actions.keys()):
-                if action == list(self.robot.actions.keys())[-1]:
-                    message += "and " + action + ". \n"
-                else:
-                    message += action + ", "
-            message += "When you define action in domain.pddl, you must use that action set. No other actions is permitted. \n"
-            self.prompt_instruction = message
+        elif self.task == 1 or "hanoi":
+            message += f"Our goal is {self.robot.goal}, which is called {self.task}. " + \
+                       "In a problem instance, there are lings, a manipulator robot(it's me!), and a tower. \n" + \
+                       f"I want to define a domain name as {self.task}."
+            message = self.task_prompt(message)
 
-            """ ----------------------------------- """
-            # Add example pddl if it existed, message reset
-            if self.problem_prompt:
-                message += "Here is an example of a problem.pddl. \n"
-                message += self.problem_prompt
-                message += " \n" + \
-                           "The initial state and goal state will be given like this. \n"
+        elif self.task == 2 or "blocksworld":
+            message += f"Our goal is {self.robot.goal}, which is called {self.task}. " + \
+                       "In a problem instance, there are blocks and a manipulator robot(it's me!). \n" + \
+                       f"I want to define a domain name as {self.task}."
+            message = self.task_prompt(message)
 
-            if self.domain_prompt:
-                message += "Here is an example of a domain.pddl. \n"
-                message += self.domain_prompt
-                message += " \n" + \
-                    "Refer this pddl and modify this domain.pddl \n"
-            message += "Please generate the only pddl part without any description."
-            self.prompt_pddl = message
-        
+        elif self.task == 3 or "cooking":
+            message += f"Our goal is {self.robot.goal}, which is called {self.task}. " + \
+                       "In a problem instance, there are vegetables, tools and a manipulator robot(it's me!). \n" + \
+                       f"I want to define a domain name as {self.task}."
+            message = self.task_prompt(message)
+
         else:
-            raise ValueError("Task Error: 0: Bin_Packing")
-        
+            raise KeyError("0: bin packing, 1: hanoi, 2: blocksworld, 3: cooking")
+
+        self.prompt_predicates = message
+
+    def task_prompt(self, message):
+        # Add predicates
+        if len(self.predicates) == 0:
+            message += "Given this goal, I want to make a domain.pddl. \n"
+        else:
+            message += "We want to consider the predicates such as "
+            for predicate in self.predicates:
+                if predicate == self.predicates[-1]:
+                    message += "and " + predicate + ". \n"
+                else:
+                    message += predicate + ", "
+            message += "Given this goal, I want to make a domain.pddl"
+        message += "Actions must consider the predicates in preconditions and effects. \n"
+        return message
+
+    def human_instruction_encoding(self):
+
+        # Add Human instruction, message reset
+        message = f"Now, I'm going to talk about precautions when doing {self.task}. \n"
+        message += self.human_instruction
+
+        # Add actions when making actions
+        message += "The actions I can do are "
+        for action in list(self.robot.actions.keys()):
+            if action == list(self.robot.actions.keys())[-1]:
+                message += "and " + action + ". \n"
+            else:
+                message += action + ", "
+        message += "When you define action in domain.pddl, you must use that action set. " + \
+                   "No other actions is permitted. \n"
+        self.prompt_instruction = message
+
+    def pddl_instruction_encoding(self):
+        message = ""
+        if self.problem_prompt:
+            message += "Here is an example of a problem.pddl. \n"
+            message += self.problem_prompt
+            message += " \n" + \
+                       "The initial state and goal state will be given like this. \n"
+
+        if self.domain_prompt:
+            message += "Here is an example of a domain.pddl. \n"
+            message += self.domain_prompt
+            message += " \n" + \
+                       "Refer this pddl and modify this domain.pddl \n"
+        message += "Please generate the only pddl without any explanation to return your answer to pddl file."
+        self.prompt_pddl = message
+
     def log_prompt(self):
         result_dir_json = os.path.join(self.result_dir, self.name + "_prompt.json")
         result_dir_txt = os.path.join(self.result_dir, self.name + "_prompt.txt")
@@ -271,6 +284,7 @@ class PDDL:
         with open(result_dir_txt, "w") as save_file:
             save_file.write("--Predicate Prompt--\n" + self.prompt_predicates +
                             "\n\n--Instruction Prompt--\n" + self.prompt_instruction)
+            save_file.write("\n\n--PDDL Prompt--\n" + self.prompt_pddl)
             save_file.close()
 
         with open(result_dir_json, "w") as save_file:
@@ -281,8 +295,8 @@ class PDDL:
         self.prompt_encoding()
         self.log_prompt()
 
-        self.gpt4.add_text_message_manual(role="user", content=self.prompt_predicates)
-        self.gpt4.add_text_message_manual(role="user", content=self.prompt_instruction)
-        self.gpt4.add_text_message_manual(role="user", content=self.prompt_pddl)
-
-        self.gpt4.run_manual_prompt(name=self.args.name, is_save=True)
+        # self.gpt4.add_text_message_manual(role="user", content=self.prompt_predicates)
+        # self.gpt4.add_text_message_manual(role="user", content=self.prompt_instruction)
+        # self.gpt4.add_text_message_manual(role="user", content=self.prompt_pddl)
+        #
+        # self.gpt4.run_manual_prompt(name=self.args.name, is_save=True)

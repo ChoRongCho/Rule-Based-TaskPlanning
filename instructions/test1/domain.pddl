@@ -1,18 +1,19 @@
 ;Header and description
+
 (define (domain packing)
 
 ;remove requirements that are not needed
 (:requirements :strips :fluents :durative-actions :timed-initial-literals :typing :conditional-effects :negative-preconditions :duration-inequalities :equality)
 
 (:types ;todo: enumerate types and their hierarchy here, e.g. car truck bus - vehicle
-    out_bin, bin - place 
-    robot 
+    out_bin, bin - place
+    robot
     item - object
-    soft, fragile, flexible, rigid - property ;object property predicates
+    soft - property
 )
 
 (:predicates ;todo: define predicates here
-    
+
     ; General place predicates
     (is-clear ?out_bin)
     (is-empty ?bin)
@@ -22,9 +23,6 @@
 
     ; Object property predicates
     (is_soft ?soft ?item)
-    (is_fragile ?fragile ?item)
-    (is_flexible ?flexible ?item)
-    (is_rigid ?rigid ?item)
 
     ; Object place predicates
     (out_of_bin ?item)

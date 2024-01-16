@@ -1,0 +1,30 @@
+{
+  "purpose": "Give a general instruction about the bin packing. ",
+  "instruction": "you are gpt",
+  "prompt": [
+    {
+      "index" : 0,
+      "role": "user",
+      "content": "During packing the objects, I must follow several rules. First, put a fragile object on top of a soft object to prevent breaking the fragile object.",
+      "image_path": false
+    },
+    {
+      "index" : 1,
+      "role": "user",
+      "content": "Second, a flexible object is preferred to be folded to make it compact to secure spaces for other objects.",
+      "image_path": false
+    },
+    {
+      "index" : 2,
+      "role": "user",
+      "content": "Third, a rigid object should not be pressed hard.",
+      "image_path": false
+    },
+		{
+      "index" : 3,
+      "role": "user",
+      "content": "Fourth, a deformable object can be pressed if possible.",
+      "image_path": false
+    }
+  ]
+}
