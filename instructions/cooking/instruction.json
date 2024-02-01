@@ -1,0 +1,42 @@
+{
+  "purpose": "Give a general instruction about the cooking. ",
+  "instruction": "you are gpt",
+  "prompt": [
+    {
+      "index" : 0,
+      "role": "user",
+      "content": "During cooking, I must follow several rules.",
+      "image_path": false
+    },
+    {
+      "index" : 1,
+      "role": "user",
+      "content": "First, there are vegetables, tools that are used for cutting or slicing the vegetables and locations where vegetables can place. ",
+      "image_path": false
+    },
+    {
+      "index" : 2,
+      "role": "user",
+      "content": "Second, when picking a objects, the object must be pickable and my hands should be empty. ",
+      "image_path": false
+    },
+    {
+      "index" : 3,
+      "role": "user",
+      "content": "Third, when placing a objects, there should be no other objects on the location. ",
+      "image_path": false
+    },
+    {
+      "index" : 4,
+      "role": "user",
+      "content": "Fourth, when slicing a objects, I must have tools that can slice them, and must slice them in the workspace. ",
+      "image_path": false
+    },
+    {
+      "index" : 5,
+      "role": "user",
+      "content": "Also, I can't slice the objects which have been sliced once. ",
+      "image_path": false
+    }
+  ]
+}

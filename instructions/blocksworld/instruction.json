@@ -1,5 +1,5 @@
 {
-  "purpose": "Give a general instruction about the bin packing. ",
+  "purpose": "Give a general instruction about the blocksworld. ",
   "instruction": "you are gpt",
   "prompt": [
     {
@@ -11,7 +11,7 @@
     {
       "index" : 1,
       "role": "user",
-      "content": "First, I must pick up a free block, that means on the block there is be nothing, and I will call it clear",
+      "content": "First, I must pick up a free block, that means on the block there must be nothing, and I will call it clear. ",
       "image_path": false
     },
     {
@@ -29,7 +29,7 @@
     {
       "index" : 4,
       "role": "user",
-      "content": "Fourth, to stack a block on the another block, an another block must be clear. ",
+      "content": "Fourth, to stack a block on the another block, it must be clear. ",
       "image_path": false
     },
 		{

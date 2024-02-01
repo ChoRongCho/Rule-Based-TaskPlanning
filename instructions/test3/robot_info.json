@@ -1,0 +1,10 @@
+{
+    "exp_name": "test3",
+    "task_name": "bin_packing",
+    "descriptions": {
+        "pick": "pick an object",
+        "place": "place an object in hand",
+        "push": "push an object toward ground",
+        "fold": "fold an object"
+    }
+}

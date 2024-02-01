@@ -6,6 +6,43 @@ import numpy as np
 import torch
 
 
+class DomainPredicate:
+    def __init__(self, task):
+        try:
+            self.task = int(task)
+        except ValueError:
+            self.task = task
+
+        self.task_number = {
+            0: "bin_packing",
+            1: "hanoi",
+            2: "blocksworld",
+            3: "cooking"
+        }
+        self.domain_predicate = {
+            "bin_packing": [],
+            "hanoi": ["clear", "on", "smaller", "move"],
+            "blocksworld": ["on", "ontable", "clear", "handempty", "handfull", "holding"],
+            "cooking": ["available", "is-whole", "is-sliced", "free", "carry", "can-cut", "at", "is-workspace"]
+        }
+
+        try:
+            self.task = int(task)
+            try:
+                self.task = self.task_number[self.task]
+            except:
+                raise TaskError(self.task)
+        except ValueError:
+            self.task = task.lower()
+
+    def return_predicate(self):
+        try:
+            predicates = self.domain_predicate[self.task]
+        except:
+            raise TaskError(self.task)
+        return predicates
+
+
 def seed_all_types(seed: int = 42):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -26,12 +63,12 @@ def parse_args():
     parser.add_argument("--result_dir", type=str,
                         default="/home/changmin/PycharmProjects/GPT_examples/response",
                         help="")
-    parser.add_argument("--name", type=str, default=None, help="")
+    parser.add_argument("--name", type=str, default=None, help="Experiment name")
     parser.add_argument("--task", type=str or int, default=None, help="domain name")
 
     # data_dir
     parser.add_argument("--api_json", type=str, default=None, help="")
-    parser.add_argument("--prompt_json", type=str, default=None, help="")
+    parser.add_argument("--prompt_json", type=str, default="/home/changmin/PycharmProjects/GPT_examples/data", help="")
     parser.add_argument("--domain", action="store_true", help="Whether using domain.pddl or not.")
     parser.add_argument("--problem", action="store_true", help="Whether using problem.pddl or not.")
 
@@ -74,4 +111,3 @@ class JsonFileContentError(Exception):
 
     def __str__(self):
         return f"There is no content in {self.json_path}. "
-

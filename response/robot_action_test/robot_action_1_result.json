@@ -1,0 +1,4 @@
+{
+    "name": "robot_action_1",
+    "answer": "from dataclasses import dataclass\n\n\nclass Robot:\n    def __init__(self,\n                 name: str = \"UR5\",\n                 goal: str = None,\n                 actions: dict = None):\n        self.name = name\n        self.goal = goal\n        self.actions = actions\n\n        self.robot_handempty = True\n        self.robot_now_holding = False\n\n    def handempty(self):\n        self.robot_handempty = True\n\n    def holding(self, objects):\n        self.robot_handempty = False\n        self.robot_now_holding = objects\n\n\n@dataclass\nclass Object:\n    # Basic dataclass\n    index: int\n    name: str\n    location: tuple\n    size: tuple\n    color: str or bool\n    object_type: str\n    \n    # Added predicates\n    is_flexible: bool = False\n    is_deformable: bool = False\n    is_fragile: bool = False\n    is_foldable: bool = False\n"
+}

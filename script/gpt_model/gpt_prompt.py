@@ -79,6 +79,11 @@ class GPTInterpreter:
 
     def log_answer(self, answer, name=""):
         # question = self.message[-1]["content"]
+        if not os.path.exists(self.result_dir):
+            os.makedirs(self.result_dir)
+            print(f"Directory '{self.result_dir}' created successfully.")
+        else:
+            print(f"Directory '{self.result_dir}' already exists.")
         result_dir_json = os.path.join(self.result_dir, name + "_result.json")
         result_dir_txt = os.path.join(self.result_dir, name + "_result.pddl")
 
@@ -92,28 +97,42 @@ class GPTInterpreter:
             f.write(answer)
             f.close()
 
-    def run_json_prompt(self):
-        client = OpenAI(api_key=self.api_key)
-        self.add_message()
+    def add_message_manual(self, role, content, image_url: list[str] or str or bool = False):
+        if not image_url:
+            # Only text message
+            prompt = {"role": role, "content": content}
+        else:
+            prompt = [{"type": "text", "text": content}]
+            if type(image_url) is str:
+                image_url = [image_url]
+            for image in image_url:
+                encoded_image = self.encode_image(image)
+                prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}})
 
-        response = client.chat.completions.create(
-            model=self.setting["model"],
-            messages=self.message,
-            max_tokens=self.setting["max_token"],
-            temperature=self.setting["temperature"],
-            top_p=self.setting["top_p"]
-        )
-        answer = response.choices[0].message.content
-
-        if self.result_dir:
-            self.log_answer(answer=answer)
-
-    def add_text_message_manual(self, role, content):
-        """
-        manual prompt
-        """
-        prompt = {"role": role, "content": content}
+        prompt = {"role": role, "content": prompt}
         self.message.append(prompt)
+
+    def add_message_multiple_images(self, role, content, image_urls: list[str] or str):
+        if not image_urls:
+            # Only text message
+            prompt = {"role": role, "content": content}
+        else:
+            prompt = [{"type": "text", "text": content}]
+            if type(image_urls) == str:
+                image_urls = list[image_urls]
+            for image_url in image_urls:
+                encoded_image = self.encode_image(image_url)
+                prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}})
+
+        prompt = {"role": role, "content": prompt}
+        self.message.append(prompt)
+
+    def delete_text_message_manual(self, index: int):
+        if 0 <= index < len(self.message):
+            print(f"Delete a message {self.message[index]}")
+            del self.message[index]
+        else:
+            raise IndexError
 
     def run_manual_prompt(self, name, is_save=False):
         """
@@ -128,7 +147,6 @@ class GPTInterpreter:
         """
 
         client = OpenAI(api_key=self.api_key)
-        # self.add_message_manual()
         response = client.chat.completions.create(
             model=self.setting["model"],
             messages=self.message,
@@ -140,3 +158,23 @@ class GPTInterpreter:
 
         if is_save:
             self.log_answer(answer=answer, name=name)
+        print(answer)
+        return answer
+
+    def run_json_prompt(self, name: str):
+        client = OpenAI(api_key=self.api_key)
+        self.add_message()
+
+        response = client.chat.completions.create(
+            model=self.setting["model"],
+            messages=self.message,
+            max_tokens=self.setting["max_token"],
+            temperature=self.setting["temperature"],
+            top_p=self.setting["top_p"]
+        )
+        answer = response.choices[0].message.content
+
+        if self.result_dir:
+            self.log_answer(answer=answer, name=name)
+        print(answer)
+        return answer

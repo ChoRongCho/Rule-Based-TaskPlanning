@@ -1,6 +1,6 @@
 (define (domain blocksworld)
     (:requirements :strips :typing)
-    (:types block robot)
+    (:types block table robot)
     (:predicates 
         (on ?x - block ?y - block)
         (ontable ?x - block)

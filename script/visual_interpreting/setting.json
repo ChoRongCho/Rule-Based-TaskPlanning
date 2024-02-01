@@ -1,0 +1,25 @@
+{
+  "api_key": "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",
+
+  "setting_pddl": {
+    "model": "gpt-4",
+    "max_token": 1200,
+    "temperature": 0.8,
+    "top_p": 1,
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+  },
+
+  "setting_vision": {
+    "model": "gpt-4-vision-preview",
+    "max_token": 300,
+    "temperature": 0.5,
+    "top_p": 1,
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+  }
+}
+
+
+
+
