@@ -53,7 +53,7 @@ def main():
 
 
 def clients():
-    client = OpenAI(api_key="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")
+    client = OpenAI(api_key="")
 
 
 
