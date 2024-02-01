@@ -1,1 +1,0 @@
-In this picture, there are eight disks of various colors stacked on the leftmost peg of the toy.

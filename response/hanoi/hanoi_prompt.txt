@@ -1,0 +1,26 @@
+--Predicate Prompt--
+Hi, my name is UR5, and I am a robot. 
+Our goal is , which is called hanoi. In a problem instance, there are disks, a manipulator robot(it's me!), and a tower. 
+I want to define a domain name as hanoi.We want to consider the predicates such as clear, on, smaller, and move. 
+Given this goal, I want to make a domain.pddl. 
+Actions must consider the predicates in preconditions and effects. 
+Assistant: Ok! I'll never change your given conditions such as actions and predicates. 
+
+
+--Instruction Prompt--
+Now, I'm going to talk about precautions when doing hanoi. 
+During solving a hanoi problem, I must follow several rules.
+First, I can only move the disk. No other actions are available. 
+Second, a bigger disk never on the smaller disk. Only the smaller one can be on the bigger disk. 
+In that case, the target is [disk], the peg or disk where the [disk] want to move to is [to], and the underlying disk of the [disk] is [from]. 
+Third, if the [disk] is smaller than the [to], we will define that case as {smaller [to] [disk]}. 
+Fourth, if there is no disk on the disk or peg, I will call the situation as clear. 
+The actions I can do are and move. 
+When you define action in domain.pddl, you must use that action set. No other actions is permitted. 
+Assistant: Considering your request, I think I only need to consider the preconditions and effects of the action part! 
+By the way, if you have a problem.pddl file, can you show me it? If so, I can do better! 
+
+--PDDL Prompt--
+Please generate the only pddl without any explanation to return your answer to pddl file. 
+Never add your any word to pddl file. 
+Assistant: Sure! I'll respond in only a pddl file! Here you are! 

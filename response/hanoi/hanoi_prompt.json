@@ -1,0 +1,8 @@
+{
+    "name": "hanoi",
+    "prompt": {
+        "predicates": "Hi, my name is UR5, and I am a robot. \nOur goal is , which is called hanoi. In a problem instance, there are disks, a manipulator robot(it's me!), and a tower. \nI want to define a domain name as hanoi.We want to consider the predicates such as clear, on, smaller, and move. \nGiven this goal, I want to make a domain.pddl. \nActions must consider the predicates in preconditions and effects. \n",
+        "instruction": "Now, I'm going to talk about precautions when doing hanoi. \nDuring solving a hanoi problem, I must follow several rules.\nFirst, I can only move the disk. No other actions are available. \nSecond, a bigger disk never on the smaller disk. Only the smaller one can be on the bigger disk. \nIn that case, the target is [disk], the peg or disk where the [disk] want to move to is [to], and the underlying disk of the [disk] is [from]. \nThird, if the [disk] is smaller than the [to], we will define that case as {smaller [to] [disk]}. \nFourth, if there is no disk on the disk or peg, I will call the situation as clear. \nThe actions I can do are and move. \nWhen you define action in domain.pddl, you must use that action set. No other actions is permitted. \n",
+        "pddl": "Please generate the only pddl without any explanation to return your answer to pddl file. \nNever add your any word to pddl file. \n"
+    }
+}

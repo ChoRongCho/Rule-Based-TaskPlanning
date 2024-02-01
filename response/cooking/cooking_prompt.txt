@@ -1,0 +1,53 @@
+--Predicate Prompt--
+Hi, my name is a two arm manipulator, and I am a robot. 
+Our goal is , which is called cooking. In a problem instance, there are vegetables, tools and a manipulator robot(it's me!). 
+I want to define a domain name as cooking. 
+We want to consider the predicates such as available, is-whole, is-sliced, free, carry, can-cut, at, and is-workspace. 
+Given this goal, I want to make a domain.pddl. 
+Actions must consider the predicates in preconditions and effects. 
+Assistant: Ok! I'll never change your given conditions such as actions and predicates. 
+
+
+--Instruction Prompt--
+Now, I'm going to talk about precautions when doing cooking. 
+During cooking, I must follow several rules.
+First, there are vegetables, tools that are used for cutting or slicing the vegetables and locations where vegetables can place. 
+Second, when picking a objects, the object must be pickable and my hands should be empty. 
+Third, when placing a objects, there should be no other objects on the location. 
+Fourth, when slicing a objects, I must have tools that can slice them, and must slice them in the workspace. 
+Also, I can't slice the objects which have been sliced once. 
+The actions I can do are place, pick, and slice. 
+When you define action in domain.pddl, you must use that action set. No other actions is permitted. 
+Assistant: Considering your request, I think I only need to consider the preconditions and effects of the action part! 
+By the way, if you have a problem.pddl file, can you show me it? If so, I can do better! 
+
+--PDDL Prompt--
+Here is an example of a problem.pddl. 
+(define (problem cooking1)
+    (:domain cooking)
+    (:objects
+        cucumber - vegetable
+        counter cutting_board bowl - location
+        a_bot b_bot - robot
+        knife - tool
+    )
+    (:init
+        (available cucumber)
+        (is-whole cucumber)
+        (is-workspace cutting_board)
+        (free a_bot)
+        (carry b_bot knife)
+        (can-cut knife)
+        (at cucumber counter)
+    )
+    (:goal
+        (and
+            (at cucumber bowl)
+            (is-sliced cucumber)
+        )
+    )
+) 
+The initial state and goal state will be given like this. 
+Please generate the only pddl without any explanation to return your answer to pddl file. 
+Never add your any word to pddl file. 
+Assistant: Sure! I'll respond in only a pddl file! Here you are! 

@@ -1,1 +1,0 @@
-orange. blue. yellow. red. purple.

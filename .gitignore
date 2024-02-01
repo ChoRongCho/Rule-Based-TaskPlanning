@@ -2,3 +2,10 @@ class_pracc.py
 setting.json
 my_personal.json
 data/
+.vscode/
+response/my_vision
+response/robot_action_test
+response/test1
+response/test2
+response/domain_test
+my_memos/

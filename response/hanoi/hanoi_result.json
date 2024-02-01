@@ -1,0 +1,4 @@
+{
+    "name": "hanoi",
+    "answer": "```pddl\n(define (domain hanoi)\n(:requirements :strips :equality :typing)\n(:types \n    disk peg)\n\n(:predicates \n    (on ?x - disk ?y - (either disk peg)) \n    (smaller ?x - disk ?y - disk) \n    (clear ?x - (either disk peg)))\n\n(:action move\n    :parameters (?disk - disk ?from - (either disk peg) ?to - (either disk peg))\n    :precondition (and (on ?disk ?from) (clear ?disk) (clear ?to) (smaller ?disk ?to))\n    :effect (and \n        (not (on ?disk ?from)) \n        (not (clear ?to)) \n        (on ?disk ?to) \n        (clear ?from))))\n```"
+}
