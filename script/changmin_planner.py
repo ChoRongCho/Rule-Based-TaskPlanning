@@ -1,120 +1,66 @@
-from dataclasses import dataclass
+import json
+import os
+from database.database import Robot
+from gpt_model.gpt_prompt import GPTInterpreter
+from groundingdino.util.inference import load_model
 
 
-class Robot:
-    def __init__(self,
-                 name: str = "UR5",
-                 goal: str = None,
-                 actions: dict = None):
-        self.name = name
-        self.goal = goal
-        self.actions = actions
+class ChangminPlanner:
+    def __init__(self, args):
+        # basic setting
+        self.args = args
+        self.task_name = args.task_name
+        self.exp_name = args.name
 
-        self.robot_handempty = True
-        self.robot_now_holding = False
+        # json path
+        self.robot_json_path = os.path.join(args.robot_json, "robot.json")
+        self.prompt_example_path = os.path.join(args.prompt_json, "prompt_examples.json")
+        self.task_prompt_path = os.path.join(args.prompt_json, self.task_name, self.task_name + ".json")
 
-    def handempty(self):
-        self.robot_handempty = True
+        # get robot_information from json_file
+        robot_data = self.get_json_data(self.robot_json_path)
+        robot_data = robot_data[self.task_name]
+        self.robot = Robot(name=robot_data["name"],
+                           goal=robot_data["goal"],
+                           actions=robot_data["actions"])
 
-    def holding(self, objects):
-        self.robot_handempty = False
-        self.robot_now_holding = objects
+        # get prompt_examples
+        self.prompt_examples = self.get_json_data(self.prompt_example_path)
+        self.task_prompt = self.get_json_data(self.task_prompt_path)
 
+        # gpt4 initialize
+        self.gpt4_vision = GPTInterpreter(
+            api_json=args.api_json,
+            prompt_json=False,
+            result_dir=args.result_dir,
+            version="vision"
+        )
 
-@dataclass
-class Objects:
-    # Basic dataclass
-    index: int
-    name: str
-    location: tuple
-    color: str or bool
-    object_type: str
+        self.gpt4_text = GPTInterpreter(
+            api_json=args.api_json,
+            prompt_json=False,
+            result_dir=args.result_dir,
+            version="pddl"
+        )
 
+        # Get Visual Interpreter
+        self.model_dir = "/home/changmin/PycharmProjects/research/GroundingDINO"
+        self.gd_dir = os.path.join(self.model_dir, "groundingdino/config/GroundingDINO_SwinT_OGC.py")
+        self.check_dir = os.path.join(self.model_dir, "weights/groundingdino_swint_ogc.pth")
+        self.model = load_model(self.gd_dir, self.check_dir)
+        self.BOX_THRESHOLD = 0.35
+        self.TEXT_THRESHOLD = 0.25
 
-@dataclass
-class BinPackingObject:
-    # Basic dataclass
-    index: int
-    name: str
-    location: tuple
-    color: str or bool
-    object_type: str
+        self.TEXT_PROMPT = "".join([
+            phrase + " ."
+            for phrase in text_phrases
+        ])
 
-    is_foldable: bool = False
-    is_flexible: bool = False
-    is_deformable: bool = False
-    is_fragile: bool = False
-
-
-@dataclass
-class Task:
-    name: str
-
-
-@dataclass
-class Domain:
-    types: dict
-    requirements: str
-    predicates: str
-    actions: dict
+        # Domain Generator
 
 
-@dataclass
-class Problem:
-    objects: dict
-    init_state: dict
-    goal_state: dict
-
-
-def main():
-    # Given task and object list from image understanding
-    task = "bin_packing"
-
-    obj1 = BinPackingObject(index=1, name="obj1", location=(10, 20), color="red", object_type="object")
-    obj2 = BinPackingObject(index=2, name="obj2", location=(15, 30), color="blue", object_type="object",
-                            is_deformable=True)
-    obj3 = BinPackingObject(index=3, name="obj3", location=(0, 10), color="red", object_type="object",
-                            is_fragile=True)
-    obj4 = BinPackingObject(index=4, name="obj4", location=(30, 40), color="green", object_type="object",
-                            is_foldable=True)
-    box = BinPackingObject(index=0, name="box", location=(20, 50), color=None, object_type="bin")
-    objects_list = [obj1, obj2, obj3, obj4, box]
-
-    # robot skill
-    robot = Robot(
-        name="UR5",
-        goal="packing all object in the bin",
-        actions={
-            "pick": "pick {object} not in {bin}",
-            "place": "place {object} in hand on {bin}",
-            "push": "push {object} downward",
-            "fold": "fold {object}",
-            "out": "pick {object} in {bin}"
-        }
-    )
-
-    def robot_pick(object, bin):
-        pass
-
-    def robot_place(object, bin):
-        pass
-
-    def robot_push(object):
-        pass
-
-    def robot_fold(object):
-        pass
-
-    def robot_out(object, bin):
-        pass
-
-    """
-    rule
-    1. when pick the object, the robot.handempty is True.
-    2. when place the object, the robot.handempty is False.
-    3. when push the object, the object.is_fragile is False, object.is_deformable and robot.handempty is True
-    4. when place the object.is_fragile, after object.is_deformable is placed.
-    5. when out the object, the robot.handempty is True
-    
-    Fill the robot_action function using rule conditions
-    """
+    @staticmethod
+    def get_json_data(json_path):
+        with open(json_path, "r") as file:
+            data = json.load(file)
+        return data

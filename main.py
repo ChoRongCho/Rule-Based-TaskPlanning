@@ -1,14 +1,70 @@
 import json
-import time
-import os
-from script.gpt_model.pddl_generator import PDDL
+
 from script.gpt_model.gpt_prompt import GPTInterpreter
-from script.utils.utils import parse_args, seed_all_types, DomainPredicate
+from script.gpt_model.pddl_generator import PDDL
 from script.utils.make_exp import CreateExperiment
+from script.utils.utils import parse_args, seed_all_types, DomainPredicate
+
+
+def main_types():
+    exp_name = "robot_action_test"
+    api_json = "setting.json"
+    prompt_json = False
+    result_dir = "response/" + exp_name
+
+    gpt4 = GPTInterpreter(api_json=api_json,
+                          prompt_json=prompt_json,
+                          result_dir=result_dir,
+                          version="vision")
+
+    # examples
+    with open("data/prompt_examples.json", "r") as file:
+        exp = json.load(file)
+        object_message0 = exp["object_observation_message"]
+        object_message1 = exp["object_type_message"]
+
+    images = ["/home/changmin/PycharmProjects/GPT_examples/data/cooking/problem1.jpg"]
+    gpt4.add_message_manual(role="user", content=object_message0[0]["content"], image_url=images)
+    gpt4.add_message_manual(role="assistant", content=object_message0[1]["content"], image_url=False)
+
+    images = ["/home/changmin/PycharmProjects/GPT_examples/data/blocksworld/problem1.jpg"]
+    gpt4.add_message_manual(role="user", content=object_message0[2]["content"], image_url=images)
+    gpt4.add_message_manual(role="assistant", content=object_message0[3]["content"], image_url=False)
+
+    prompt = f"We are going to do a hanoi task which is stacking disks in order from the big ones. \n" + \
+             "These are the observations where I'm going to work. \n"
+    prompt += "What objects or tools are here? Don't include a robot. \n"
+    images = ["/home/changmin/PycharmProjects/GPT_examples/data/hanoi/problem1.jpg"]
+
+    gpt4.add_message_manual(role="user", content=prompt, image_url=images)
+    answer = gpt4.run_manual_prompt(name="", is_save=False)
+
+    print("\n\n")
+    print("-"*50)
+
+    # gpt4.reset_message()
+    # gpt4.message = object_message1
+    #
+    # prompt = f"We are going to do a cooking task which is cooking foods using given ingredients. \n" + \
+    #          f"In our case, we are only doing slice. \n" + \
+    #          "\nThese are the observations where I'm going to work. \n"
+    # prompt += "What objects or tools are here? \n"
+    # images = ["/home/changmin/PycharmProjects/GPT_examples/data/cooking/problem1.jpg"]
+    # gpt4.add_message_manual(role="user", content=prompt, image_url=images)
+    # gpt4.add_message_manual(role="assistant", content=answer, image_url=False)
+    #
+    # prompt = "Divide the character of the object according to the task. \n"
+    # gpt4.add_message_manual(role="user", content=prompt, image_url=False)
+    #
+    # print("\n\n")
+    # print("-"*50)
+    # answer = gpt4.run_manual_prompt(name="", is_save=False)
+
+    # new_answer = "1. Location: plate, chopping board. \n2. Ingredients: carrot, meat, garlic. \n3. Tool: knife. \n"
 
 
 def main0():
-    exp_name = "robot_action_test"
+    exp_name = "predicates_test"
     api_json = "setting.json"
     prompt_json = "my_personal.json"
     result_dir = "response/" + exp_name
@@ -29,88 +85,93 @@ def main0():
                 location: tuple
                 color: str or bool
                 object_type: str
-
-
-            @dataclass
-            class BinPackingObject:
-                # Basic dataclass
-                index: int
-                name: str
-                location: tuple
-                color: str or bool
-                object_type: str
-
-                is_foldable: bool = False
-                is_flexible: bool = False
-                is_deformable: bool = False
-                is_fragile: bool = False
+            
+            class Robot:
+                # Define skills
+                def __init__(self,
+                             name: str = "UR5",
+                             goal: str = None,
+                             actions: dict = None):
+                    self.name = name
+                    self.goal = goal
+                    self.actions = actions
+            
+                    self.robot_handempty = True
+                    self.robot_now_holding = False
+                    self.robot_base_pose = True
+            
+                # basic state
+                def state_handempty(self):
+                    self.robot_handempty = True
+                    self.robot_base_pose = False
+            
+                # basic state
+                def state_holding(self, objects):
+                    self.robot_handempty = False
+                    self.robot_now_holding = objects
+                    self.robot_base_pose = False
+            
+                # basic state
+                def state_base(self):
+                    self.robot_base_pose = True
+            
+                # hanoi
+                def move(self, disk, peg):
+                    # make a preconditions for actions
+                    print(f"move {disk.name} to {peg.name}")
 
             def main():
                 # Given task and object list from image understanding
-                task = "bin_packing"
+                task = "hanoi"
 
-                obj1 = BinPackingObject(index=1, name="obj1", location=(10, 20), color="red", object_type="object")
-                obj2 = BinPackingObject(index=2, name="obj2", location=(15, 30), color="blue", object_type="object",
-                                        is_deformable=True)
-                obj3 = BinPackingObject(index=3, name="obj3", location=(0, 10), color="red", object_type="object",
-                                        is_fragile=True)
-                obj4 = BinPackingObject(index=4, name="obj4", location=(30, 40), color="green", object_type="object",
-                                        is_foldable=True)
-                box = BinPackingObject(index=0, name="box", location=(20, 50), color=None, object_type="bin")
-                objects_list = [obj1, obj2, obj3, obj4, box]
+                obj1 = Object(index=1, name="disk1", location=(0, 20), color="red", object_type="disk")
+                obj2 = Object(index=2, name="disk2", location=(0, 30), color="blue", object_type="disk")
+                obj3 = Object(index=3, name="disk3", location=(0, 10), color="red", object_type="disk")
+                obj4 = Object(index=4, name="disk4", location=(0, 40), color="green", object_type="disk")
+                obj5 = Object(index=5, name="disk5", location=(0, 50), color="black", object_type="disk")
+                obj6 = Object(index=6, name="disk6", location=(0, 60), color="orange", object_type="disk")
+                obj7 = Object(index=7, name="disk7", location=(0, 0), color="purple", object_type="disk")
+                peg1 = Object(index=8, name="peg1", location=(0, 0), color="brown", object_type="peg")
+                peg2 = Object(index=9, name="peg2", location=(10, 0), color="brown", object_type="peg")
+                peg3 = Object(index=10, name="peg3", location=(20, 0), color="brown", object_type="peg")
+                objects_list = [obj1, obj2, obj3, obj4, table]
 
                 # robot skill
                 robot = Robot(
                     name="UR5",
                     goal="packing all object in the bin",
                     actions={
-                        "pick": "pick {object} not in {bin}",
-                        "place": "place {object} in hand on {bin}",
-                        "push": "push {object} downward",
-                        "fold": "fold {object}",
-                        "out": "pick {object} in {bin}"
+                        "move": "move {disk} to {peg}
                     }
                 )
                 
-                # for example, when command robot.place comes,
-                # robot.place(object, bin) => The robot actually place the holding {object} in {bin}
+                # for example, when command robot.pick_up comes,
+                # robot.put_down(block1) => The robot actually place the holding {block} on {table}
                 # But we have to define preconditions and effect of the robot action like pddl script.
-                 
-                # rule
-                # 0. if object.location == bin.location => the object is in {bin}
-                # 1. when pick the object, the robot.handempty is True.
-                # 2. when place the object, the robot.handempty is False.
-                # 3. when push the object, the object.is_fragile is False, object.is_deformable and robot.handempty is True and {object} in {bin}
-                # 4. when place the object.is_fragile, after object.is_deformable is placed.
-                # 5. when out the object, the robot.handempty is True
                 
-                Fill the                 
+                # rule0: smaller objects are never below the bigger objects
+                # rule1: the all initial objects are in the pegs
+                # rule2: you must move one by one
+                
+                Fill the predicates of 
                 "
-                def robot_pick():
-                    pass
-                def robot_place():
-                    pass
-                def robot_push():
-                    pass
-                def robot_fold():
-                    pass
-                def robot_out():
-                    pass "
-                function using rule conditions and planning the actions to pack all objects_list in bin 
+                @dataclass
+                class Objects:
+                    # Basic dataclass
+                    index: int
+                    name: str
+                    location: tuple
+                    color: str or bool
+                    object_type: str
+                    
+                    # additional predicates for hanoi
+                    
+                    "
+                used for hanoi task.
             """
-    content_answer = """
-        def robot_pick(object, bin):
-            if self.robot.handempty and object.location != bin.location:
-                self.robot.pick(object)
-                self.robot.handempty(False) 
-                self.robot.holding(object)
-        
-        def robot_place(object1, object2, bin):
-            if not self.robot.handempty and robot.holding(object1)
-    """
-    
+
     gpt4.add_message_manual(role="user", content=content)
-    gpt4.run_manual_prompt(name="robot_action_0", is_save=True)
+    gpt4.run_manual_prompt(name="predicates1", is_save=True)
 
 
 def main():
@@ -142,7 +203,6 @@ def main():
     content1_answer += "We are now doing slicing. And there are some rules. \n"
     content1_answer += "We are cutting the ingredients on the chopping board. So we have to know " + \
                        "the state of the ingredients whether sliced or not. \n"
-
 
     # content2 = "We are now going to do cooking which is cooking foods using given ingredients. "\
     #            "In our case, we are only doing slicing. \nWhen slicing, we only do them on the chopping board. "
@@ -250,4 +310,4 @@ def read_python_code():
 
 
 if __name__ == '__main__':
-    read_python_code()
+    main0()

@@ -7,7 +7,6 @@ The definition for domain input
 
 """
 from dataclasses import dataclass
-from robot_action_set import Robot
 
 
 @dataclass
@@ -32,39 +31,3 @@ class Object:
     is_soft: bool
     out_bin: bool
     in_bin: bool
-
-
-class Domain(Robot):
-    def __init__(self):
-        super().__init__(name="Robot_name",
-                         goal="goal of the task",
-                         actions={"action1": "description1", "action2": "description1"})
-        # task
-        self.task = "task_name"
-
-        # list of the object
-        # ... Modifying Object
-        obj1 = Object(index=0, name="", location=(0, 0), size=(0, 0), color=None, object_type="")
-        obj2 = Object(index=1, name="", location=(0, 0), size=(0, 0), color=None, object_type="")
-        self.object_list = [obj1, obj2]
-
-        # cautions
-        self.cautions = """
-        Summarize the given cautions in the multi-line annotation
-        """
-
-    # Robot action re-definition
-    def pick(self):
-        pass
-
-    def place(self):
-        pass
-
-    def push(self):
-        pass
-
-    def fold(self):
-        pass
-
-    def out(self):
-        pass

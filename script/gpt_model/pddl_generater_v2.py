@@ -79,6 +79,11 @@ class PDDLv2:
 
 
 class DomainGen:
+    """
+    Input:
+    1. robot information,
+    2. prompt examples
+    """
     def __init__(self,
                  args,
                  robot: Robot):
@@ -88,21 +93,25 @@ class DomainGen:
 
         self.task_name = args.task_name
         self.mode: str = args.mode
+
+        # initialize
         self.domain_info = Domain(types={},
                                   requirements="",
                                   predicates="",
                                   actions={})
 
-        # Get prompt data
+        # Get prompt examples
         # self.args.data_dir = "/home/changmin/PycharmProjects/GPT_examples/data"
         self.prompt_file = os.path.join(self.args.data_dir, self.task_name, self.task_name + ".json")
         with open(self.prompt_file, "r") as file:
             self.prompt_text_data = json.load(file)
+
             self.task_description = self.prompt_text_data["script"]["task_description"]
-            self.vision_prompt = self.prompt_text_data["script"]["vision_prompt"]
-            self.behaviour_prompt = self.prompt_text_data["script"]["behaviour_prompt"]
-            self.action_prompt = self.prompt_text_data["script"]["action_prompt"]
-            self.pddl_prompt = self.prompt_text_data["script"]["pddl_prompt"]
+            # self.vision_prompt = self.prompt_text_data["script"]["vision_prompt"]
+            # self.behaviour_prompt = self.prompt_text_data["script"]["behaviour_prompt"]
+            # self.action_prompt = self.prompt_text_data["script"]["action_prompt"]
+            # self.pddl_prompt = self.prompt_text_data["script"]["pddl_prompt"]
+
             file.close()
 
         # Get domain info
@@ -155,7 +164,8 @@ class DomainGen:
 
         :param example_prompt:
         :param objects_list: ["", "", "", ""]
-        :return:
+        :return:self.domain_info.types
+
         """
         if self.mode.lower() == "llm":
             prompt = f"We are now going to do {self.task_name} which is {self.task_description}. \n"
@@ -183,23 +193,18 @@ class DomainGen:
 
         elif self.mode.lower() == "manual":
             if self.task_name == "bin_packing":
-                self.domain_info.types = {"bin": [], "object": [], "robot": []}
+                self.domain_info.types = {"bin": [], "object": []}
             elif self.task_name == "blocksworld":
-                self.domain_info.types = {"block": [], "table": [], "robot": []}
+                self.domain_info.types = {"block": [], "table": []}
             elif self.task_name == "hanoi":
-                self.domain_info.types = {"disk": [], "peg": [], "robot": []}
+                self.domain_info.types = {"disk": [], "peg": []}
             elif self.task_name == "cooking":
-                self.domain_info.types = {"ingredient": [], "tool": [], "location": [], "robot": []}
+                self.domain_info.types = {"ingredient": [], "tool": [], "location": []}
             else:
                 raise ValueError(f"Task name {self.task_name} is wrong. ")
 
         else:
             raise ValueError(f"Mode {self.mode} is wrong: LLM or manual. ")
-
-    def define_predicates(self):
-        if self.mode.lower() == "llm":
-            prompt = ""
-
 
     def define_actions(self, robot: Robot):
         pass
@@ -213,7 +218,7 @@ class DomainGen:
         pass
 
 
-    def run(self):
+    def generate_domain(self):
         pass
 
 

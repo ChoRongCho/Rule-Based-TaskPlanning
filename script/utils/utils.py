@@ -78,6 +78,26 @@ def parse_args():
     return args
 
 
+def parse_args_v2():
+    parser = argparse.ArgumentParser()
+
+    # for main.py and evaluate.py
+    parser.add_argument("--data_dir", type=str, default="./instructions", help="")
+    parser.add_argument("--result_dir", type=str, default="./response", help="")
+    parser.add_argument("--exp_name", type=str, default=None, help="Experiment name")
+    parser.add_argument("--task_name", type=str or int, default=None, help="task name")
+
+    # data_dir
+    parser.add_argument("--api_json", type=str, default=None, help="")
+    parser.add_argument("--prompt_json", type=str, default="./data", help="")
+    parser.add_argument("--robot_json", type=str, default="./data", help="")
+
+    # related to problem generation and refinement
+    parser.add_argument("--seed", type=int, default=42, help="random seed")
+    args = parser.parse_args()
+    return args
+
+
 def create_folder(directory):
     try:
         if not os.path.exists(directory):

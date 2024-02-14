@@ -19,7 +19,10 @@ class GPTInterpreter:
 
         self.setting = {}
         self.api_key = self.get_api_key()
-        self.name, self.description, self.instruction, self.prompt = self.get_prompt()
+        if self.prompt_json:
+            self.name, self.description, self.instruction, self.prompt = self.get_prompt()
+        else:
+            self.name, self.description, self.instruction, self.prompt = "", "", "", ""
         self.message = []
 
     @staticmethod
@@ -49,17 +52,14 @@ class GPTInterpreter:
 
         :return: name, description, instruction, prompt
         """
-        try:
-            with open(self.prompt_json) as file:
-                data = json.load(file)
-                name = data["name"]
-                description = data["description"]
-                instruction = data["instruction"]
-                prompt = data["prompt"]
-                file.close()
-                return name, description, instruction, prompt
-        except:
-            return "", "", "", ""
+        with open(self.prompt_json) as file:
+            data = json.load(file)
+            name = data["name"]
+            description = data["description"]
+            instruction = data["instruction"]
+            prompt = data["prompt"]
+            file.close()
+            return name, description, instruction, prompt
 
     def add_message(self):
         sorted_prompt = sorted(self.prompt, key=lambda x: x['index'])
@@ -108,8 +108,8 @@ class GPTInterpreter:
             for image in image_url:
                 encoded_image = self.encode_image(image)
                 prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}})
+            prompt = {"role": role, "content": prompt}
 
-        prompt = {"role": role, "content": prompt}
         self.message.append(prompt)
 
     def add_message_multiple_images(self, role, content, image_urls: list[str] or str):
@@ -178,3 +178,9 @@ class GPTInterpreter:
             self.log_answer(answer=answer, name=name)
         print(answer)
         return answer
+
+    def reset_message(self):
+        self.message = []
+
+    def pop_message(self):
+        self.message.pop()
