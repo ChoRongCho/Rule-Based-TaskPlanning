@@ -46,5 +46,61 @@
     {"role": "assistant", "content": ""},
     {"role": "user", "content": ""},
     {"role": "assistant", "content": ""}
+  ],
+  "init_state_message":[
+    {
+      "index" : 0,
+      "role": "system",
+      "content": "You are a good assistant. You must answer in the following format. ",
+      "image_path": false
+    },
+    {
+      "index" : 1,
+      "role": "user",
+      "content": "Q. We are now doing a bin_packing task which is packing all target objects into the box. \nThis is a first observation where I work in. \nWhat objects or tools are here? \n",
+      "image_path": "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/train/problem1.jpg"
+    },
+    {
+      "index" : 2,
+      "role": "assistant",
+      "content": "A. Bin_packing is a task that packing objects into the bin. To doing a bin_packing, we should separate a box and objects. \n---\n Objects_out_box: brown object, black object, blue object \n Objects_in_box: \n Bin: white box\n---\n",
+      "image_path": false
+    },
+    {
+      "index" : 3,
+      "role": "user",
+      "content": "Q. We are now doing a bin_packing task which is packing all target objects into the box. \nThis is a first observation where I work in. \nWhat objects or tools are here? \n",
+      "image_path": "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/train/problem5.jpg"
+    },
+    {
+      "index" : 4,
+      "role": "assistant",
+      "content": "A. Bin_packing is a task that packing objects into the bin. To doing a bin_packing, we should separate a box and objects. \n---\n Objects_out_box: yellow object, brown object, blue object, black object \n Objects_in_box: \n Bin: white box\n---\n",
+      "image_path": false
+    },
+    {
+      "index" : 5,
+      "role": "user",
+      "content": "Q. We are now doing a bin_packing task which is packing all target objects into the box. \nThis is a first observation where I work in. \nWhat objects or tools are here? \n",
+      "image_path": "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/train/problem7.jpg"
+    },
+    {
+      "index" : 6,
+      "role": "assistant",
+      "content": "A. Bin_packing is a task that packing objects into the bin. To doing a bin_packing, we should separate a box and objects. \n---\n Objects_out_box: yellow object, blue object \n Objects_in_box: black object \n Bin: white box\n---\n",
+      "image_path": false
+    },
+    {
+      "index" : 7,
+      "role": "user",
+      "content": "Q. We are now doing a bin_packing task which is packing all target objects into the box. \nThis is a first observation where I work in. \nWhat objects or tools are here? \n",
+      "image_path": "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/train/problem16.jpg"
+    },
+    {
+      "index" : 8,
+      "role": "assistant",
+      "content": "A. Bin_packing is a task that packing objects into the bin. To doing a bin_packing, we should separate a box and objects. \n---\n Objects_out_box: yellow object, blue object \n Objects_in_box: blue object \n Bin: white box\n---\n",
+      "image_path": false
+    }
   ]
 }

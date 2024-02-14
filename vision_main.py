@@ -7,7 +7,7 @@ def main():
     #
     # gpt4 = GPTInterpreter(
     #     api_json="setting.json",
-    #     prompt_json="test_prompt_vision.json",
+    #     example_prompt_json="test_prompt_vision.json",
     #     result_dir="response/my_vision",
     #     version="vision"
     # )

@@ -1,0 +1,4 @@
+{
+    "name": "problem11",
+    "answer": "A. Bin_packing is a task that packing objects into the bin. To doing a bin_packing, we should separate a box and objects. \n\n Objects_out_box: blue object, white object, black object \n Objects_in_box: brown object \n Bin: white box"
+}

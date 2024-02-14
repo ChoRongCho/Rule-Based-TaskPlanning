@@ -1,37 +1,75 @@
 import os.path
-import random
 
 import cv2
-import numpy as np
 
-all_images = ["cropped_20240103_blue_strip_1.jpg",
-              "cropped_20240103_blue_strip_2.jpg",
-              "cropped_20240103_capsule_1.jpg",
-              "cropped_20240103_capsule_2.jpg",
-              "cropped_20240103_cup.jpg",
-              "cropped_20240103_frame.jpg",
-              "cropped_20240103_handkerchief.jpg",
-              "cropped_20240103_sharpener.jpg"]
+from utils import crop_image
+
+all_images = [
+    "problem1.jpg",
+    "problem2.jpg",
+    "problem3.jpg",
+    "problem4.jpg",
+    "problem5.jpg",
+    "problem6.jpg",
+    "problem7.jpg",
+    "problem8.jpg",
+    "problem9.jpg",
+    "problem10.jpg",
+    "problem11.jpg",
+    "problem12.jpg",
+    "problem13.jpg",
+    "problem14.jpg",
+    "problem15.jpg",
+    "problem16.jpg",
+    "problem17.jpg",
+]
 
 
 def main():
-    for i in range(7):
-        path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing"
-        selected_images = random.sample(all_images, 4)
+    for i, image_name in enumerate(all_images):
+        path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/problems"
+        image_path = os.path.join(path, image_name)
 
-        image1 = cv2.imread(os.path.join(path, selected_images[0]))
-        image2 = cv2.imread(os.path.join(path, selected_images[1]))
-        image3 = cv2.imread(os.path.join(path, selected_images[2]))
-        image4 = cv2.imread(os.path.join(path, selected_images[3]))
+        image = cv2.imread(image_path)
+        print(image.shape)
 
-        image_left = np.concatenate((image1, image2), axis=0)
-        image_right = np.concatenate((image3, image4), axis=0)
-        image = np.concatenate((image_left, image_right), axis=1)
-        image = cv2.resize(image, (320, 240))
-        # cv2.imshow("image", image)
-        # cv2.waitKey(0)
-        image_path = os.path.join(path, f"problem{i}.jpg")
-        cv2.imwrite(image_path, image)
+
+def main2():
+    """
+    ratio = 4: 3
+    image_size = 640, 480 / 1280, 960 / 1920,  1440 / 2560, 1920
+
+    :return:
+    """
+    """----------------------------------"""
+    number = 17
+
+    # is_rotate = True
+    is_rotate = False
+    # is_save = True
+    is_save = False
+
+    # xywh = [500, 400, 3000, 2250]
+    xywh = [600, 450, 2880, 2160]
+    """----------------------------------"""
+
+    image_name = all_images[number]
+    path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/problems"
+    image_path = os.path.join(path, image_name)
+
+    image = cv2.imread(image_path)
+
+    # (4000, 3000, 3) // [x, y, 3000, 2250] => (640, 480)
+    if is_rotate:
+        image = cv2.rotate(image, cv2.ROTATE_180)
+    cropped_image = crop_image(image, xywh)
+
+    resized_image = cv2.resize(cropped_image, (640, 480))
+    cv2.imshow("cropped_image", resized_image)
+    cv2.waitKey(0)
+    if is_save:
+        cv2.imwrite(os.path.join(path, f"problem{number}.jpg"), resized_image)
+        print("Save Done")
 
 
 if __name__ == '__main__':

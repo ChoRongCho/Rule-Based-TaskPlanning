@@ -1,6 +1,7 @@
 import base64
 import json
 import os.path
+import os
 import time
 from openai import OpenAI
 
@@ -8,22 +9,22 @@ from openai import OpenAI
 class GPTInterpreter:
     def __init__(self,
                  api_json: str,
-                 prompt_json: str or bool,
+                 example_prompt_json: str or bool,
                  result_dir: str or bool = False,
                  version: str = "vision"):
 
+        self.BASE_PATH = "/home/changmin/PycharmProjects/GPT_examples"
+
         self.result_dir = result_dir
         self.api_json = api_json
-        self.prompt_json = prompt_json
+        self.example_prompt_json = example_prompt_json
         self.version = version
 
         self.setting = {}
         self.api_key = self.get_api_key()
-        if self.prompt_json:
-            self.name, self.description, self.instruction, self.prompt = self.get_prompt()
-        else:
-            self.name, self.description, self.instruction, self.prompt = "", "", "", ""
         self.message = []
+
+        print(self.setting)
 
     @staticmethod
     def encode_image(image_path):
@@ -32,7 +33,7 @@ class GPTInterpreter:
             return output
 
     def get_api_key(self):
-        with open(self.api_json, "r") as file:
+        with open(os.path.join(self.BASE_PATH, self.api_json), "r") as file:
             setting = json.load(file)
 
             if self.version.lower() == "vision":
@@ -46,23 +47,23 @@ class GPTInterpreter:
 
             return api_key
 
-    def get_prompt(self):
+    def add_example_prompt(self, message_name: str):
         """
-        integrated prompt using json file
+        Add example before run gpt-4
 
-        :return: name, description, instruction, prompt
+        :param message_name:
+        :return:
         """
-        with open(self.prompt_json) as file:
+
+        if not self.example_prompt_json:
+            raise ValueError("There is no example json file")
+
+        with open(os.path.join(self.BASE_PATH, self.example_prompt_json), "r") as file:
             data = json.load(file)
-            name = data["name"]
-            description = data["description"]
-            instruction = data["instruction"]
-            prompt = data["prompt"]
+            example_message = data[message_name]
             file.close()
-            return name, description, instruction, prompt
 
-    def add_message(self):
-        sorted_prompt = sorted(self.prompt, key=lambda x: x['index'])
+        sorted_prompt = sorted(example_message, key=lambda x: x['index'])
         for i in range(len(sorted_prompt)):
             role = sorted_prompt[i]["role"]
             content_text = sorted_prompt[i]["content"]
@@ -72,10 +73,15 @@ class GPTInterpreter:
                 content = [{"type": "text", "text": content_text},
                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}}]
                 prompt = {"role": role, "content": content}
-
             else:
                 prompt = {"role": role, "content": content_text}
             self.message.append(prompt)
+
+    def log_prompt(self, name=""):
+        result_dir_json = os.path.join(self.result_dir, name + "_prompt.txt")
+        with open(result_dir_json, "w") as f:
+            f.write(str(self.message))
+            f.close()
 
     def log_answer(self, answer, name=""):
         # question = self.message[-1]["content"]
@@ -89,9 +95,10 @@ class GPTInterpreter:
 
         json_object = {"name": name, "answer": answer}
         json_object = json.dumps(json_object, indent=4)
-        with open(result_dir_json, "w") as f:
-            f.write(json_object)
-            f.close()
+
+        # with open(result_dir_json, "w") as f:
+        #     f.write(json_object)
+        #     f.close()
 
         with open(result_dir_txt, "w") as f:
             f.write(answer)
@@ -110,21 +117,6 @@ class GPTInterpreter:
                 prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}})
             prompt = {"role": role, "content": prompt}
 
-        self.message.append(prompt)
-
-    def add_message_multiple_images(self, role, content, image_urls: list[str] or str):
-        if not image_urls:
-            # Only text message
-            prompt = {"role": role, "content": content}
-        else:
-            prompt = [{"type": "text", "text": content}]
-            if type(image_urls) == str:
-                image_urls = list[image_urls]
-            for image_url in image_urls:
-                encoded_image = self.encode_image(image_url)
-                prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}})
-
-        prompt = {"role": role, "content": prompt}
         self.message.append(prompt)
 
     def delete_text_message_manual(self, index: int):
@@ -158,7 +150,6 @@ class GPTInterpreter:
 
         if is_save:
             self.log_answer(answer=answer, name=name)
-        print(answer)
         return answer
 
     def run_json_prompt(self, name: str):

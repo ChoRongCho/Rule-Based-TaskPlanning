@@ -31,14 +31,14 @@ class ChangminPlanner:
         # gpt4 initialize
         self.gpt4_vision = GPTInterpreter(
             api_json=args.api_json,
-            prompt_json=False,
+            example_prompt_json=False,
             result_dir=args.result_dir,
             version="vision"
         )
 
         self.gpt4_text = GPTInterpreter(
             api_json=args.api_json,
-            prompt_json=False,
+            example_prompt_json=False,
             result_dir=args.result_dir,
             version="pddl"
         )

@@ -13,12 +13,12 @@ def main_types():
     result_dir = "response/" + exp_name
 
     gpt4 = GPTInterpreter(api_json=api_json,
-                          prompt_json=prompt_json,
+                          example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="vision")
 
     # examples
-    with open("data/prompt_examples.json", "r") as file:
+    with open("prompt_examples.json", "r") as file:
         exp = json.load(file)
         object_message0 = exp["object_observation_message"]
         object_message1 = exp["object_type_message"]
@@ -70,7 +70,7 @@ def main0():
     result_dir = "response/" + exp_name
 
     gpt4 = GPTInterpreter(api_json=api_json,
-                          prompt_json=prompt_json,
+                          example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="pddl")
 
@@ -182,7 +182,7 @@ def main():
     result_dir = "response/" + exp_name
 
     gpt4 = GPTInterpreter(api_json=api_json,
-                          prompt_json=prompt_json,
+                          example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="vision")
 
@@ -245,7 +245,7 @@ def main2():
 
 
 def main3():
-    data_path = "data/prompt_examples.json"
+    data_path = "prompt_examples.json"
     with open(data_path, "r") as file:
         data = json.load(file)
         message = data["domain_type_message"]
@@ -260,7 +260,7 @@ def main3():
     result_dir = "response/" + exp_name
 
     gpt4 = GPTInterpreter(api_json=api_json,
-                          prompt_json=prompt_json,
+                          example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="pddl")
     gpt4.message = message2
@@ -290,7 +290,7 @@ def read_python_code():
     result_dir = "response/" + exp_name
 
     gpt4 = GPTInterpreter(api_json=api_json,
-                          prompt_json=prompt_json,
+                          example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="pddl")
 

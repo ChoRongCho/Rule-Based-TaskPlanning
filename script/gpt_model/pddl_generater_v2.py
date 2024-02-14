@@ -41,7 +41,7 @@ class PDDLv2:
         self.predicates = None
         self.gpt4 = GPTInterpreter(
             api_json=args.api_json,
-            prompt_json=args.prompt_json,
+            example_prompt_json=args.prompt_json,
             result_dir=args.result_dir,
             version="pddl"
         )
@@ -143,7 +143,7 @@ class DomainGen:
         # GPT4
         self.gpt4 = GPTInterpreter(
             api_json=args.api_json,
-            prompt_json=False,
+            example_prompt_json=False,
             result_dir=args.result_dir,
             version="vision"
         )

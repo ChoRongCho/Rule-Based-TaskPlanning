@@ -45,7 +45,7 @@ class PDDL:
         3. data_dir for get prompts
         4. task
         5. api_json
-        6. prompt_json : false if used manual prompt
+        6. example_prompt_json : false if used manual prompt
         7. domain, problem: True or False
         """
         # basic
@@ -64,7 +64,7 @@ class PDDL:
 
         # GPT Client
         self.gpt4 = GPTInterpreter(api_json=args.api_json,
-                                   prompt_json=args.prompt_json,
+                                   example_prompt_json=args.prompt_json,
                                    result_dir=self.result_dir,
                                    version="pddl")
 

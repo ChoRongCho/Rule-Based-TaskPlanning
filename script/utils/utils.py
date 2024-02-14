@@ -1,7 +1,7 @@
 import argparse
 import os
 import random
-
+import cv2
 import numpy as np
 import torch
 
@@ -68,7 +68,7 @@ def parse_args():
 
     # data_dir
     parser.add_argument("--api_json", type=str, default=None, help="")
-    parser.add_argument("--prompt_json", type=str, default="/home/changmin/PycharmProjects/GPT_examples/data", help="")
+    parser.add_argument("--example_prompt_json", type=str, default=None, help="")
     parser.add_argument("--domain", action="store_true", help="Whether using domain.pddl or not.")
     parser.add_argument("--problem", action="store_true", help="Whether using problem.pddl or not.")
 
@@ -89,7 +89,7 @@ def parse_args_v2():
 
     # data_dir
     parser.add_argument("--api_json", type=str, default=None, help="")
-    parser.add_argument("--prompt_json", type=str, default="./data", help="")
+    parser.add_argument("--example_prompt_json", type=str, default="./data", help="")
     parser.add_argument("--robot_json", type=str, default="./data", help="")
 
     # related to problem generation and refinement
@@ -131,3 +131,25 @@ class JsonFileContentError(Exception):
 
     def __str__(self):
         return f"There is no content in {self.json_path}. "
+
+
+def crop_image(image, xywh):
+    real_h = image.shape[0]
+    real_w = image.shape[1]
+    x, y, w, h = xywh
+
+    if real_h > real_w:
+        image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        real_h = image.shape[0]
+        real_w = image.shape[1]
+        pass
+
+    if x + w > real_w:
+        print("insert value under", real_w, ", input: ", w)
+        raise ValueError
+    if y + h > real_h:
+        print("insert value under", real_h, ", input: ", h)
+        raise ValueError
+
+    cropped_image = image[y: y + h, x: x + w, :]
+    return cropped_image
