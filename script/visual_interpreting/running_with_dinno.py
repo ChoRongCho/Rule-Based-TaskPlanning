@@ -1,6 +1,7 @@
 import os
 import cv2
 import torch
+from typing import List
 from groundingdino.util.inference import load_image, load_model, predict, annotate
 from torchvision.ops import box_convert
 
@@ -48,8 +49,12 @@ class MyDino:
         annotated_frame = annotate(image_source=image_source, boxes=boxes, logits=logits, phrases=phrases)
         return boxes, phrases, annotated_frame
 
-    def modifying_text_prompt(self, text_prompt: str):
-        self.TEXT_PROMPT = text_prompt
+    def modifying_text_prompt(self, text_prompt: List):
+        text_query = "".join([
+            phrase + " ."
+            for phrase in text_prompt
+        ])
+        self.TEXT_PROMPT = text_query
 
     def get_bbox(self):
         boxes, phrases, frame = self.run_dinno()
@@ -89,14 +94,15 @@ def main():
     #     "problem16.jpg",
     #     "problem17.jpg",
     # ]
-    image_path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/train"
+    image_path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/val"
     save_path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/"
 
     visual_interpreter = MyDino(
-            name="problem1.jpg",
+            name="problem3.jpg",
             image_path=image_path,
             save_path=save_path
         )
+    visual_interpreter.modifying_text_prompt(['', 'blue object ', 'blue object', 'white box', 'black object'])
     detected_obj = visual_interpreter.get_bbox()
     print(detected_obj)  # cx, cy, wx, hy
 
