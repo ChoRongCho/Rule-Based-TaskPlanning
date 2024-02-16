@@ -75,11 +75,12 @@ def parse_args():
     # data_dir
     parser.add_argument("--api_json", type=str, default=None, help="")
     parser.add_argument("--example_prompt_json", type=str, default=None, help="")
-    # parser.add_argument("--domain", action="store_true", help="Whether using domain.pddl or not.")
-    # parser.add_argument("--problem", action="store_true", help="Whether using problem.pddl or not.")
 
     # related to problem generation and refinement
     parser.add_argument("--seed", type=int, default=42, help="random seed")
+    parser.add_argument("--is_save", type=bool, default=True, help="save the response")
+    parser.add_argument("--max_predicates", type=int, default=5, help="number of predicates you want to generate")
+
     args = parser.parse_args()
     return args
 

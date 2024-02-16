@@ -40,7 +40,7 @@ def main_types():
     answer = gpt4.run_manual_prompt(name="", is_save=False)
 
     print("\n\n")
-    print("-"*50)
+    print("-" * 50)
 
     # gpt4.reset_message()
     # gpt4.message = object_message1
@@ -64,114 +64,52 @@ def main_types():
 
 
 def main0():
-    exp_name = "predicates_test"
+    exp_name = "20240216_get_domain"
     api_json = "setting.json"
-    prompt_json = "my_personal.json"
+    prompt_json = "prompt_examples.json"
     result_dir = "response/" + exp_name
+    name = "test6_with_examples"
+
+    task = "hanoi"
+    task_description = "stacking disks in order from the big ones. \n"
+    max_predicates = 3
 
     gpt4 = GPTInterpreter(api_json=api_json,
                           example_prompt_json=prompt_json,
                           result_dir=result_dir,
                           version="pddl")
+    gpt4.add_example_prompt("domain_message")
+    content = f"""
+    We are now going to do a {task} task whose goal is {task_description}""" + """
+There are many objects in this domain, this is object information that comes from image observation. \n
+1. {'Disk': ['yellow object', 'black object ', 'red object', 'blue object'], 'Peg': ['left peg', 'right peg', 'middle peg']} 
+This is an example of python dataclass code 
+    """ + f"""
+from dataclasses import dataclass
 
-    content = """from dataclasses import dataclass
-            
 
-            @dataclass
-            class Objects:
-                # Basic dataclass
-                index: int
-                name: str
-                location: tuple
-                color: str or bool
-                object_type: str
-            
-            class Robot:
-                # Define skills
-                def __init__(self,
-                             name: str = "UR5",
-                             goal: str = None,
-                             actions: dict = None):
-                    self.name = name
-                    self.goal = goal
-                    self.actions = actions
-            
-                    self.robot_handempty = True
-                    self.robot_now_holding = False
-                    self.robot_base_pose = True
-            
-                # basic state
-                def state_handempty(self):
-                    self.robot_handempty = True
-                    self.robot_base_pose = False
-            
-                # basic state
-                def state_holding(self, objects):
-                    self.robot_handempty = False
-                    self.robot_now_holding = objects
-                    self.robot_base_pose = False
-            
-                # basic state
-                def state_base(self):
-                    self.robot_base_pose = True
-            
-                # hanoi
-                def move(self, disk, peg):
-                    # make a preconditions for actions
-                    print(f"move {disk.name} to {peg.name}")
+@dataclass
+class Object:
+    # Basic dataclass
+    index: int
+    name: str
+    location: tuple
+    size: tuple
+    color: str or bool
+    object_type: str
+    
+    # Object physical properties predicates
+    
+    # {task} Predicates (max {max_predicates})
+    
 
-            def main():
-                # Given task and object list from image understanding
-                task = "hanoi"
-
-                obj1 = Object(index=1, name="disk1", location=(0, 20), color="red", object_type="disk")
-                obj2 = Object(index=2, name="disk2", location=(0, 30), color="blue", object_type="disk")
-                obj3 = Object(index=3, name="disk3", location=(0, 10), color="red", object_type="disk")
-                obj4 = Object(index=4, name="disk4", location=(0, 40), color="green", object_type="disk")
-                obj5 = Object(index=5, name="disk5", location=(0, 50), color="black", object_type="disk")
-                obj6 = Object(index=6, name="disk6", location=(0, 60), color="orange", object_type="disk")
-                obj7 = Object(index=7, name="disk7", location=(0, 0), color="purple", object_type="disk")
-                peg1 = Object(index=8, name="peg1", location=(0, 0), color="brown", object_type="peg")
-                peg2 = Object(index=9, name="peg2", location=(10, 0), color="brown", object_type="peg")
-                peg3 = Object(index=10, name="peg3", location=(20, 0), color="brown", object_type="peg")
-                objects_list = [obj1, obj2, obj3, obj4, table]
-
-                # robot skill
-                robot = Robot(
-                    name="UR5",
-                    goal="packing all object in the bin",
-                    actions={
-                        "move": "move {disk} to {peg}
-                    }
-                )
-                
-                # for example, when command robot.pick_up comes,
-                # robot.put_down(block1) => The robot actually place the holding {block} on {table}
-                # But we have to define preconditions and effect of the robot action like pddl script.
-                
-                # rule0: smaller objects are never below the bigger objects
-                # rule1: the all initial objects are in the pegs
-                # rule2: you must move one by one
-                
-                Fill the predicates of 
-                "
-                @dataclass
-                class Objects:
-                    # Basic dataclass
-                    index: int
-                    name: str
-                    location: tuple
-                    color: str or bool
-                    object_type: str
-                    
-                    # additional predicates for hanoi
-                    
-                    "
-                used for hanoi task.
+However, we cannot do complete planning with this dataclass predicate alone that means we have to add another predicates that fully describe the {task}. 
+We don't have to consider physical properties of the object.
+Add more predicates needed for {task} to class Object. 
             """
 
     gpt4.add_message_manual(role="user", content=content)
-    gpt4.run_manual_prompt(name="predicates1", is_save=True)
+    gpt4.run_manual_prompt(name=name, is_save=True)
 
 
 def main():

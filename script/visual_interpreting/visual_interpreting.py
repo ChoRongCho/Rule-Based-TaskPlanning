@@ -21,7 +21,7 @@ class FindObjects:
         self.data_dir = args.data_dir
         self.input_image_name = args.input_image
         self.image_url = os.path.join(self.data_dir, self.input_image_name)
-        self.is_save = True
+        self.is_save = args.is_save
 
         # Get Visual Interpreter
         self.model_dir = "/home/changmin/PycharmProjects/research/GroundingDINO"
@@ -146,22 +146,21 @@ class FindObjects:
             try:
                 print(f"Start {i}")
                 result_dict, result_list = self.visual_interpreter(prompt=self.prompt, image_url=self.image_url)
-                print(result_dict, result_list)
                 break
             except:
                 raise Exception("Making expected answer went wrong. ")
         self.modifying_text_prompt(result_list)
         detected_object = self.get_bbox()
-        print("-"*30)
-        print(detected_object)
+        return detected_object, result_dict
 
 
 def main():
     args = parse_args()
     args.data_dir = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/val"
-
     find_obj = FindObjects(args)
-    find_obj.run_find_obj()
+    detected_object, detected_object_types = find_obj.run_find_obj()
+    print(detected_object)
+    print(detected_object_types)
 
 
 if __name__ == '__main__':

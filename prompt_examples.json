@@ -38,15 +38,38 @@
   ],
 
   "domain_message": [
-    {"role": "user", "content": "We are now going to do a bin_packing task whose goal is packing all objects in the bin. \nWe have a basic python dataclass code structures describing the predicates and the objects properties. \\n"},
-    {"role": "assistant", "content": ""},
-    {"role": "user", "content": ""},
-    {"role": "assistant", "content": ""},
-    {"role": "user", "content": ""},
-    {"role": "assistant", "content": ""},
-    {"role": "user", "content": ""},
-    {"role": "assistant", "content": ""}
+    {
+      "index" : 0,
+      "role": "system",
+      "content": "You are a good assistant. You must answer in the following format. ",
+      "image_path": false
+    },
+    {
+      "index" : 1,
+      "role": "user",
+      "content": "We are now going to do a bin_packing task whose goal is packing all objects in the bin.\nThere are many objects in this domain, this is object information that comes from image observation.\n1. {'Objects_out_box': ['yellow object', 'black object '], 'Objects_in_box': [''], 'Bin': ['white box']}\n2. {0: {'black object': [202, 258, 130, 136]}, 1: {'white box': [489, 225, 257, 354]}, 2: {'yellow object': [114, 134, 151, 113]}}, where [202, 258, 130, 136] means [202, 258]: center of the object, [130, 136]: size of the object.\nThis is an example of python dataclass code\n\n\nfrom dataclasses import dataclass\n\n\n@dataclass\nclass Object:\n    # Basic dataclass\n    index: int\n    name: str\n    location: tuple\n    size: tuple\n    color: str or bool\n    object_type: str\n\n    # Object physical properties predicates\n\n    # bin_packing Predicates (max 5)\n\n\nHowever, we cannot do complete planning with this dataclass predicate alone that means we have to add another predicates that fully describe the bin_packing.\nAlso you have to add predicates such as is_rigid, is_flexible and is_foldable.\nAdd more predicates needed for bin_packing to class Object.",
+      "image_path": false
+    },
+    {
+      "index" : 2,
+      "role": "assistant",
+      "content": "from dataclasses import dataclass\n\n@dataclass\nclass Object:\n    # Basic dataclass\n    index: int\n    name: str\n    location: tuple\n    size: tuple\n    color: str or bool\n    object_type: str\n\n    # Object physical properties predicates\n    is_rigid: bool\n    is_flexible: bool\n    is_foldable: bool\n\n    # bin_packing Predicates (max 5)\n    in_bin: bool\n    out_bin: bool\n    is_stackable: bool\n    is_bigger_than_bin: bool\n    on_the_object: Object or bool\n",
+      "image_path": false
+    },
+    {
+      "index" : 3,
+      "role": "user",
+      "content": "We are now going to do a blocksworld task whose goal is stacking blocks.\nThere are many objects in this domain, this is object information that comes from image observation.\n1. {'Blocks': ['yellow object', 'black object', \"red object\"]}\n2. {0: {'yellow object': [138, 218, 130, 136]}, 1: {'black object': [281, 235, 125, 59]}, 2: {'red object': [16, 24, 61, 77]}}, where [138, 213, 130, 136] means [138, 213]: center of the object, [130, 136]: size of the object.\nThis is an example of python dataclass code\n\nfrom dataclasses import dataclass\n\n\n@dataclass\nclass Object:\n    # Basic dataclass\n    index: int\n    name: str\n    location: tuple\n    size: tuple\n    color: str or bool\n    object_type: str\n\n    # Object physical properties predicates\n\n    # blocksworld Predicates (max 3)\n\n\nHowever, we cannot do complete planning with this dataclass predicate alone that means we have to add another predicates that fully describe the blocksworld.\nWe don't have to consider physical properties of the object.\nAdd more predicates needed for blocksworld to class Object.\n",
+      "image_path": false
+    },
+    {
+      "index" : 4,
+      "role": "assistant",
+      "content": "from dataclasses import dataclass\n\n@dataclass\nclass Object:\n    # Basic dataclass\n    index: int\n    name: str\n    location: tuple\n    size: tuple\n    color: str or bool\n    object_type: str\n\n    # Object physical properties predicates\n\n    # blocksworld Predicates (max 3)\n    is_stackable: bool\n    is_on_table: bool\n    is_on_the_block: Object or bool\n",
+      "image_path": false
+    }
   ],
+
   "init_state_message":[
     {
       "index" : 0,

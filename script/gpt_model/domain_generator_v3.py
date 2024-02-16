@@ -1,6 +1,6 @@
-import re
+import os
 
-from script.database.database import Robot
+from script.gpt_model.gpt_prompt import GPTInterpreter
 
 
 class DomainGen:
@@ -36,21 +36,13 @@ class DomainGen:
     """
 
     def __init__(self,
-                 args,
-                 robot: Robot,
-                 task_prompt,
-                 prompt_examples,
-                 gpt4_vision,
-                 gpt4_text):
+                 args):
         self.args = args
-        self.task_name = self.args.task_name
-        self.robot = robot
-
-        self.task_prompt = task_prompt
-        self.prompt_examples = prompt_examples
-
-        self.gpt4_vision = gpt4_vision
-        self.gpt4_text = gpt4_text
+        self.task_name = args.task
+        self.exp_name = args.name
+        self.data_dir = args.data_dir
+        self.is_save = args.is_save
+        self.max_predicates = args.max_predicates
 
         self.all_answer = {
             "type_prompt": [],
@@ -58,72 +50,60 @@ class DomainGen:
             "predicates_prompt": [],
             "action_prompt": [],
         }
+        self.result_dir = os.path.join(args.result_dir, self.exp_name)
+        self.gpt4 = GPTInterpreter(
+            api_json=args.api_json,
+            example_prompt_json=args.example_prompt_json,
+            result_dir=self.result_dir,
+            version="pddl"
+        )
 
-    def get_objects_from_observations(self, images: list or str):
-        """
-        input: images, task_information
-        output: objects list, types
-        1. for image in images
-            add message with task description
-            ask gpt what is here and what can be divided as a type
-        3. after get types: modifying text_prompt of the ground_dino
-        4. get bound_box(loc and size), color, object_types
-        5. for all object return objects_list
-
-        :param images:
-        :return:
-        """
-        task_info = self.task_prompt["task_description"]
-        prompt = f"We are going to do a {self.task_name} task which is {task_info}. " + \
-                 "\nThese are the observations where I'm going to work. \n"
-        prompt += "What objects or tools are here? \n"
-
-        self.gpt4_vision.add_message_manual(role="user", content=prompt, image_url=images)
-        answer = self.gpt4_vision.run_manual_prompt(name="", is_save=False)
-        self.all_answer["type_prompt"].append(answer)
-
-        self.gpt4_vision.add_message_manual(role="assistant", content=answer, image_url=False)
-
-        def type_parser(type_answer: str, types: dict):
-            pattern = re.compile(r'(\d+)\.\s*([\w\s]+):\s*([^\.]+)\.')
-            matches = pattern.findall(type_answer)
-            for match in matches:
-                index, type_name, type_val = match
-                type_name = type_name.lower().strip()
-                type_val = [value.strip() for value in type_val.split(',')]
-                types[type_name] = type_val
-            return types
-
-        # # initialize the prompt
-        # prompt += "There are many objects in interest such as "
-        # for obj in objects_list:
-        #     if obj == objects_list[-1]:
-        #         prompt += "and " + "obj" + ". \n"
-        #     else:
-        #         prompt += obj + ", "
-        prompt += "Divide the character of the object according to the task. \n"
-        # prompt =
-
-    def get_predicates(self, objects_list, robot_info):
+    def get_predicates(self, detected_object, detected_object_types, active_predicate: bool or list=False):
         """
         # after robot active search for object properties
         input: objects list
         output: object predicates
         """
-        prompt = f"""
-        @dataclass
-        class Objects
-            # Basic dataclass
-            index: int
-            name: str
-            location: tuple
-            color: str or bool
-            object_type: str        
-        
-        """
-        rule = self.task_prompt
+        content = f"We are now going to do a {self.task_name} task whose goal is {task_description}"
+        content += "There are many objects in this domain, " + \
+                   "this is object information that comes from image observation. \n"
+        content += f"1. {detected_object_types} \n2. {detected_object}\n"
+        content += f"""from dataclasses import dataclass
 
-        pass
+
+@dataclass
+class Object:
+    # Basic dataclass
+    index: int
+    name: str
+    location: tuple
+    size: tuple
+    color: str or bool
+    object_type: str
+    
+    # Object physical properties predicates
+    
+    # {self.task_name} Predicates (max {self.max_predicates})
+    
+        """
+        content += "However, we cannot do complete planning with this dataclass predicate alone" + \
+                   f" that means we have to add another predicates that fully describe the {self.task_name}."
+        if active_predicate:
+            content += "Also you have to add predicates such as "
+            for predicate in active_predicate:
+                if predicate == active_predicate[-1]:
+                    content += f"and {predicate}. \n"
+                else:
+                    content += predicate + ", "
+        else:
+            content += "We don't have to consider physical properties of the object."
+
+        content += f"Add more predicates needed for {self.task_name} to class Object. "
+
+        print(content)
+        # self.gpt4.add_example_prompt("domain_message")
+        # self.gpt4.add_message_manual(role="user", content=content, image_url=False)
+
 
     def active_predicates(self):
         pass
