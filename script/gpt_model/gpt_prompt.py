@@ -17,11 +17,11 @@ class GPTInterpreter:
         self.api_json = api_json
         self.example_prompt_json = example_prompt_json
         self.version = version
+        self.BASE_PATH = "/home/changmin/PycharmProjects/GPT_examples"
 
         self.setting = {}
         self.api_key = self.get_api_key()
         self.message = []
-
         print(self.setting)
 
     @staticmethod
@@ -35,9 +35,9 @@ class GPTInterpreter:
             setting = json.load(file)
 
             if self.version.lower() == "vision":
-                self.setting = setting["setting_vision"]
+                self.setting = setting["vision"]
             elif self.version.lower() == "pddl":
-                self.setting = setting["setting_pddl"]
+                self.setting = setting["pddl"]
             else:
                 raise KeyError("setting version must be a vision or a pddl.")
             api_key = setting["api_key"]
@@ -58,7 +58,7 @@ class GPTInterpreter:
 
         with open(os.path.join(self.BASE_PATH, self.example_prompt_json), "r") as file:
             data = json.load(file)
-            example_message = data[message_name]
+            example_message = data["bin_packing"][message_name]
             file.close()
 
         sorted_prompt = sorted(example_message, key=lambda x: x['index'])

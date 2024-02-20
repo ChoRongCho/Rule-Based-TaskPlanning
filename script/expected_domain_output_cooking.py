@@ -30,4 +30,4 @@ class Object:
     is_fragile: bool
     is_soft: bool
     out_bin: bool
-    in_bin: bool
+    in_bin: bool = False

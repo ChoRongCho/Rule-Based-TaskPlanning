@@ -7,7 +7,7 @@ from script.utils.utils import parse_args, seed_all_types, DomainPredicate
 
 
 def main_types():
-    exp_name = "robot_action_test"
+    exp_name = "20240220_robot_action"
     api_json = "setting.json"
     prompt_json = False
     result_dir = "response/" + exp_name
@@ -222,7 +222,7 @@ def read_python_code():
         content3 = f.read()
         f.close()
 
-    exp_name = "robot_action_test"
+    exp_name = "20240220_robot_action"
     api_json = "setting.json"
     prompt_json = "my_personal.json"
     result_dir = "response/" + exp_name

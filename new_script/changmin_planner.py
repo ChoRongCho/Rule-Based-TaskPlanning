@@ -6,6 +6,8 @@ from openai import OpenAI
 from tabulate import tabulate
 
 from new_script.gpt_model.gpt_interface import GPTInterpreter
+from new_script.temp_robot.robot import Robot
+from new_script.utils.prompt_function import PromptSet
 from new_script.utils.utils import parse_input
 from new_script.visual_interpreting.visual_interpreter import FindObjects
 
@@ -30,23 +32,24 @@ class ChangminPlanner:
         self.result_dir = os.path.join(args.result_dir, self.exp_name)
         self.input_image = os.path.join(self.data_dir, self.task, args.input_image)
 
-        # json
+        # json_dir
         self.api_json = os.path.join(self.json_dir, args.api_json)
         self.example_json = os.path.join(self.json_dir, args.example_prompt_json)
         self.robot_json = os.path.join(self.json_dir, args.robot_json)
         self.task_json = os.path.join(self.json_dir, args.task_json)
 
         # read json data
-        self.check_result_folder()
         self.example_data = self.get_json_data(self.example_json)
         self.robot_data = self.get_json_data(self.robot_json)
-        self.task_data = self.get_json_data(self.task)
-        self.task_description = self.task_data[self.task]["script"]["task_description"]
+        self.task_data = self.get_json_data(self.task_json)
+
+        self.task_description = self.task_data["script"]["task_description"]
         self.api_key, self.setting = self.get_api_key()
 
         # Initialize Class for planning
         self.answer = []
         self.question = []
+        self.table = []
 
         # GPT setting
         self.client = OpenAI(api_key=self.api_key)
@@ -59,16 +62,20 @@ class ChangminPlanner:
                                                  setting=self.setting,
                                                  version="pddl")
         self.grounding_dino = FindObjects(is_save=self.is_save)
+        self.load_prompt = PromptSet(task=self.task, task_description=self.task_description)
+        self.robot = Robot(name=self.robot_data["name"],
+                           goal=self.robot_data["goal"],
+                           actions=self.robot_data["actions"])
+        self.print_args()
 
-    # GPT
     def print_args(self):
-        table = [["Project Time", datetime.now()],
-                 ["Task", self.task],
-                 ["Exp_Name", self.exp_name],
-                 ["Input Image", self.args.input_image],
-                 ["API JSON", self.args.api_json],
-                 ["Example Prompt", self.args.example_prompt_json]]
-        print(tabulate(table))
+        self.table = [["Project Time", datetime.now()],
+                      ["Task", self.task],
+                      ["Exp_Name", self.exp_name],
+                      ["Input Image", self.args.input_image],
+                      ["API JSON", self.args.api_json],
+                      ["Example Prompt", self.args.example_prompt_json]]
+        print(tabulate(self.table))
 
     def check_result_folder(self):
         if not os.path.exists(self.result_dir):
@@ -84,44 +91,29 @@ class ChangminPlanner:
             file.close()
             return api_key, setting
 
-    @staticmethod
-    def get_json_data(json_path):
+    def get_json_data(self, json_path):
         with open(json_path, "r") as file:
             data = json.load(file)
+            data = data[self.task]
         return data
 
-    def log_answer(self, answer, name=""):
-        result_dir_json = os.path.join(self.result_dir, name + "_result.json")
-        result_dir_txt = os.path.join(self.result_dir, name + "_result.pddl")
-
-        json_object = {"name": name, "answer": answer}
-        json_object = json.dumps(json_object, indent=4)
-
-        with open(result_dir_json, "w") as f:
-            f.write(json_object)
-            f.close()
-
-        with open(result_dir_txt, "w") as f:
-            f.write(answer)
-            f.close()
-
     def prompt_detect_object(self):
-        prompt = f"We are now doing a {self.task} task which is {self.task_description}. \n"
-        prompt += "This is a first observation where I work in. \n"
-
-        prompt += "What objects or tools are here? \n"
-
-        self.gpt_interface_vision.add_example_prompt("init_state_message")
+        self.gpt_interface_vision.reset_message()
+        prompt = self.load_prompt.load_prompt_detect_object()
+        self.gpt_interface_vision.add_example_prompt("observation_message")
         self.gpt_interface_vision.add_message(role="user", content=prompt, image_url=self.input_image)
         for i in range(self.patience_repeat):
-            print(f"Start {i}")
             try:
                 answer = self.gpt_interface_vision.run_prompt()
                 result_dict, result_list = parse_input(answer=answer)
-                break
+
+                self.question.append(prompt)
+                self.answer.append(answer)
+                # break
+                return result_dict, result_list
             except:
                 raise Exception("Making expected answer went wrong. ")
-        return result_dict, result_list
+        # return result_dict, result_list
 
     def detect_object(self):
         """
@@ -134,15 +126,6 @@ class ChangminPlanner:
         detected_object = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
         return detected_object, result_dict
 
-    def run_all(self):
-        detected_object, detected_object_types = self.detect_object()
-        active_predicates = self.get_active_predicates(detected_object=detected_object)
-        object_class_python_cript = self.get_predicates(detected_object=detected_object,
-                                                        detected_object_types=detected_object_types,
-                                                        active_predicates=active_predicates)
-
-
-
     def get_predicates(self, detected_object, detected_object_types, active_predicates):
         """
 
@@ -151,30 +134,11 @@ class ChangminPlanner:
         :param active_predicates:
         :return: answer object class data
         """
-        prompt = f"We are now going to do a {self.task} task whose goal is {self.task_description}"
-        prompt += "There are many objects in this domain, " + \
-                  "this is object information that comes from image observation. \n"
-        prompt += f"1. {detected_object_types} \n2. {detected_object}\n"
-        prompt += f"""from dataclasses import dataclass
-            
-    
-@dataclass
-class Object:
-    # Basic dataclass
-    index: int
-    name: str
-    location: tuple
-    size: tuple
-    color: str or bool
-    object_type: str
-    
-    # Object physical properties predicates
-    
-    # {self.task} Predicates (max {self.max_predicates})
-        
-            """
-        prompt += "However, we cannot do complete planning with this dataclass predicate alone" + \
-                  f" that means we have to add another predicates that fully describe the {self.task}."
+        self.gpt_interface_pddl.reset_message()
+        prompt = self.load_prompt.load_prompt_get_predicates(detected_object=detected_object,
+                                                             detected_object_types=detected_object_types,
+                                                             max_predicates=self.max_predicates)
+
         if active_predicates:
             prompt += "Also you have to add predicates such as "
             for predicate in active_predicates:
@@ -184,26 +148,134 @@ class Object:
                     prompt += predicate + ", "
         else:
             prompt += "We don't have to consider physical properties of the object."
-
         prompt += f"Add more predicates needed for {self.task} to class Object. "
 
-        self.gpt_interface_pddl.add_example_prompt("domain_message")
+        self.gpt_interface_pddl.add_example_prompt("object_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
         for i in range(self.patience_repeat):
-            print(f"Start {i}")
             try:
                 object_class_python_script = self.gpt_interface_pddl.run_prompt()
-                break
+                self.question.append(prompt)
+                self.answer.append(object_class_python_script)
+                return object_class_python_script
             except:
                 raise Exception("Making expected answer went wrong. ")
 
-        return object_class_python_script
-
     def get_active_predicates(self, detected_object):
-        print(detected_object)
-        print("Start robot active search")
-        active_predicates = ["is_rigid", "is_flexible", "is_soft", "is_foldable"]
-        return active_predicates
+        """
+        random sampled active predicates
+        
+        :param detected_object:     
+        input_dict = {0: {'white box': [509, 210, 231, 323]},
+                      1: {'blue object': [204, 220, 361, 247]},
+                      2: {'yellow object': [83, 158, 135, 216]},
+                      3: {'brown object': [257, 95, 139, 148]}}
+        :return: 
+        active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
+        detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}        
+        """
+        detected_object_predicates = {}
+        for index, info in detected_object.items():
+            info = self.robot.active_search(info)
+            detected_object_predicates.update({index: info})
 
-    def generate_init_state(self):
-        pass
+        # Removing duplicate predicates.
+        tempt_list = list(detected_object_predicates.values())
+        flattened_list = [item for sublist in tempt_list for item in sublist]
+        active_predicates = list(set(flattened_list))
+
+        return active_predicates, detected_object_predicates
+
+    def get_robot_action_conditions(self, object_class_python_script):
+        self.gpt_interface_pddl.reset_message()
+        prompt = self.load_prompt.load_prompt_robot_action(object_class_python_script=object_class_python_script,
+                                                           robot_action=self.robot_data["actions"],
+                                                           task_instruction=self.task_data["instructions"])
+
+        self.gpt_interface_pddl.add_example_prompt("robot_action_message")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        for i in range(self.patience_repeat):
+            try:
+                robot_class_python_script = self.gpt_interface_pddl.run_prompt()
+                self.question.append(prompt)
+                self.answer.append(robot_class_python_script)
+                return robot_class_python_script
+            except:
+                raise Exception("Making expected answer went wrong. ")
+
+    def get_init_state(self,
+                       detected_object,
+                       detected_object_types,
+                       detected_object_predicates,
+                       object_class_python_script):
+        self.gpt_interface_pddl.reset_message()
+        prompt = self.load_prompt.load_prompt_init_state(detected_object=detected_object,
+                                                         detected_object_types=detected_object_types,
+                                                         detected_object_predicates=detected_object_predicates,
+                                                         object_class_python_script=object_class_python_script)
+        self.gpt_interface_pddl.add_example_prompt("init_state_message")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        for i in range(self.patience_repeat):
+            try:
+                init_state_python_script = self.gpt_interface_pddl.run_prompt()
+                self.question.append(prompt)
+                self.answer.append(init_state_python_script)
+                return init_state_python_script
+            except:
+                raise Exception("Making expected answer went wrong. ")
+
+    def planning_from_domain(self, object_class_python_script, robot_class_python_script, init_state_python_script):
+        prompt = self.load_prompt.load_prompt_planning(object_class_python_script=object_class_python_script,
+                                                       robot_class_python_script=robot_class_python_script,
+                                                       init_state_python_script=init_state_python_script,
+                                                       robot_action=self.robot_data["actions"],
+                                                       task_instruction=self.task_data["instructions"])
+        self.gpt_interface_pddl.add_example_prompt("domain_message")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        for i in range(self.patience_repeat):
+            try:
+                planning_python_script = self.gpt_interface_pddl.run_prompt()
+                self.question.append(prompt)
+                self.answer.append(planning_python_script)
+                return planning_python_script
+            except:
+                raise Exception("Making expected answer went wrong. ")
+
+    def run_all(self):
+        detected_object, detected_object_types = self.detect_object()
+        active_predicates, detected_object_predicates = self.get_active_predicates(detected_object=detected_object)
+        object_class_python_script = self.get_predicates(detected_object=detected_object,
+                                                         detected_object_types=detected_object_types,
+                                                         active_predicates=active_predicates)
+        robot_class_python_script = self.get_robot_action_conditions(object_class_python_script)
+        init_state_python_script = self.get_init_state(detected_object=detected_object,
+                                                       detected_object_types=detected_object_types,
+                                                       detected_object_predicates=detected_object_predicates,
+                                                       object_class_python_script=object_class_python_script)
+        planning_python_script = self.planning_from_domain(object_class_python_script=object_class_python_script,
+                                                           robot_class_python_script=robot_class_python_script,
+                                                           init_state_python_script=init_state_python_script)
+
+        if self.is_save:
+            self.check_result_folder()
+            self.log_answer()
+            file_path = os.path.join(self.result_dir, "planning.py")
+            with open(file_path, "w") as file:
+                file.write(str(object_class_python_script) + "\n\n")
+                file.write(str(robot_class_python_script) + "\n\n")
+                file.write(str(init_state_python_script) + "\n\n")
+                file.write(str(planning_python_script) + "\n")
+                file.close()
+
+    def log_answer(self):
+        log_txt_path = os.path.join(self.result_dir, "prompt.txt")
+        with open(log_txt_path, "w") as file:
+            file.write(tabulate(self.table))
+            file.write("\n")
+            file.write("-"*50 + "\n")
+            for q, a in zip(self.question, self.answer):
+                file.write(q + "\n")
+                file.write(a + "\n")
+                file.write("-"*50 + "\n")
+
+            file.close()
