@@ -18,7 +18,7 @@ def main_types():
                           version="vision")
 
     # examples
-    with open("prompt_examples.json", "r") as file:
+    with open("data/json/prompt_examples.json", "r") as file:
         exp = json.load(file)
         object_message0 = exp["object_observation_message"]
         object_message1 = exp["object_type_message"]
@@ -183,7 +183,7 @@ def main2():
 
 
 def main3():
-    data_path = "prompt_examples.json"
+    data_path = "data/json/prompt_examples.json"
     with open(data_path, "r") as file:
         data = json.load(file)
         message = data["domain_type_message"]

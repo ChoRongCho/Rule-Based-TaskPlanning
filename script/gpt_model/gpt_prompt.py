@@ -13,8 +13,6 @@ class GPTInterpreter:
                  result_dir: str or bool = False,
                  version: str = "vision"):
 
-        self.BASE_PATH = "/home/changmin/PycharmProjects/GPT_examples"
-
         self.result_dir = result_dir
         self.api_json = api_json
         self.example_prompt_json = example_prompt_json

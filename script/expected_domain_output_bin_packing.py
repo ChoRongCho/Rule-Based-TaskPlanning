@@ -44,8 +44,8 @@ class Domain(Robot):
 
         # list of the object
         # ... Modifying Object
-        obj1 = Object(index=0, name="", location=(0, 0), size=(0, 0), color=None, object_type="")
-        obj2 = Object(index=1, name="", location=(0, 0), size=(0, 0), color=None, object_type="")
+        obj1 = Object(index=0, name="", location=(0, 0), size=(0, 0), color=None, object_type="object")
+        obj2 = Object(index=1, name="", location=(0, 0), size=(0, 0), color=None, object_type="box")
         self.object_list = [obj1, obj2]
 
         # cautions
@@ -54,17 +54,9 @@ class Domain(Robot):
         """
 
     # Robot action re-definition
-    def pick(self):
-        pass
+    def main(self):
+        obj1, obj2 = self.object_list
 
-    def place(self):
-        pass
-
-    def push(self):
-        pass
-
-    def fold(self):
-        pass
-
-    def out(self):
-        pass
+        self.pick(obj=obj1)
+        self.place(obj=obj1, bins=obj2)
+        self.state_base()
