@@ -16,7 +16,7 @@ class FindObjects:
         self.gd_dir = os.path.join(self.model_dir, "groundingdino/config/GroundingDINO_SwinT_OGC.py")
         self.check_dir = os.path.join(self.model_dir, "weights/groundingdino_swint_ogc.pth")
         self.model = load_model(self.gd_dir, self.check_dir)
-        self.BOX_THRESHOLD = 0.25
+        self.BOX_THRESHOLD = 0.30
         self.TEXT_THRESHOLD = 0.25
 
         self.TEXT_PROMPT = ""
@@ -47,7 +47,7 @@ class FindObjects:
         ])
         self.TEXT_PROMPT = text_query
 
-    def get_bbox(self, image_path, result_dir):
+    def get_bbox(self, image_path, result_dir, is_save=True):
         boxes, phrases, frame = self.run_dinno(image_path)
         h, w, _ = frame.shape
         boxes = boxes * torch.Tensor([w, h, w, h])
@@ -56,10 +56,5 @@ class FindObjects:
         for points, phrase, index in zip(xyxy, phrases, range(len(xyxy))):
             x1, y1, x2, y2 = points.astype(int)
             self.detected_object.update({index: {phrase: [int((x1 + x2) / 2), int((y1 + y2) / 2), x2 - x1, y2 - y1]}})
-
-        if self.is_save:
-            new_name = "annotated_observation.jpg"
-            cv2.imwrite(os.path.join(result_dir, new_name), frame)
-        return self.detected_object
-
+        return self.detected_object, frame
 

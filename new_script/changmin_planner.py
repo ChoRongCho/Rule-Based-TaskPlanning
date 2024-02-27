@@ -1,7 +1,10 @@
 import json
 import os
+import re
+import subprocess
 from datetime import datetime
 
+import cv2
 from openai import OpenAI
 from tabulate import tabulate
 
@@ -50,6 +53,7 @@ class ChangminPlanner:
         self.answer = []
         self.question = []
         self.table = []
+        self.anno_image = False
 
         # GPT setting
         self.client = OpenAI(api_key=self.api_key)
@@ -74,7 +78,8 @@ class ChangminPlanner:
                       ["Exp_Name", self.exp_name],
                       ["Input Image", self.args.input_image],
                       ["API JSON", self.args.api_json],
-                      ["Example Prompt", self.args.example_prompt_json]]
+                      ["Example Prompt", self.args.example_prompt_json],
+                      ["Max Predicates", self.args.max_predicates]]
         print(tabulate(self.table))
 
     def check_result_folder(self):
@@ -123,7 +128,7 @@ class ChangminPlanner:
         """
         result_dict, result_list = self.prompt_detect_object()
         self.grounding_dino.modifying_text_prompt(result_list)
-        detected_object = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
+        detected_object, self.anno_image = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
         return detected_object, result_dict
 
     def get_predicates(self, detected_object, detected_object_types, active_predicates):
@@ -194,14 +199,14 @@ class ChangminPlanner:
 
         self.gpt_interface_pddl.add_example_prompt("robot_action_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
-        for i in range(self.patience_repeat):
-            try:
-                robot_class_python_script = self.gpt_interface_pddl.run_prompt()
-                self.question.append(prompt)
-                self.answer.append(robot_class_python_script)
-                return robot_class_python_script
-            except:
-                raise Exception("Making expected answer went wrong. ")
+        # for i in range(self.patience_repeat):
+        #     try:
+        robot_class_python_script = self.gpt_interface_pddl.run_prompt()
+        self.question.append(prompt)
+        self.answer.append(robot_class_python_script)
+        return robot_class_python_script
+        # except:
+        #     raise Exception("Making expected answer went wrong. ")
 
     def get_init_state(self,
                        detected_object,
@@ -215,16 +220,17 @@ class ChangminPlanner:
                                                          object_class_python_script=object_class_python_script)
         self.gpt_interface_pddl.add_example_prompt("init_state_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
-        for i in range(self.patience_repeat):
-            try:
-                init_state_python_script = self.gpt_interface_pddl.run_prompt()
-                self.question.append(prompt)
-                self.answer.append(init_state_python_script)
-                return init_state_python_script
-            except:
-                raise Exception("Making expected answer went wrong. ")
+        # for i in range(self.patience_repeat):
+        #     try:
+        init_state_python_script = self.gpt_interface_pddl.run_prompt()
+        self.question.append(prompt)
+        self.answer.append(init_state_python_script)
+        return init_state_python_script
+        # except:
+        #     raise Exception("Making expected answer went wrong. ")
 
     def planning_from_domain(self, object_class_python_script, robot_class_python_script, init_state_python_script):
+        self.gpt_interface_pddl.reset_message()
         prompt = self.load_prompt.load_prompt_planning(object_class_python_script=object_class_python_script,
                                                        robot_class_python_script=robot_class_python_script,
                                                        init_state_python_script=init_state_python_script,
@@ -232,16 +238,16 @@ class ChangminPlanner:
                                                        task_instruction=self.task_data["instructions"])
         self.gpt_interface_pddl.add_example_prompt("domain_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
-        for i in range(self.patience_repeat):
-            try:
-                planning_python_script = self.gpt_interface_pddl.run_prompt()
-                self.question.append(prompt)
-                self.answer.append(planning_python_script)
-                return planning_python_script
-            except:
-                raise Exception("Making expected answer went wrong. ")
+        # for i in range(self.patience_repeat):
+        #     try:
+        planning_python_script = self.gpt_interface_pddl.run_prompt()
+        self.question.append(prompt)
+        self.answer.append(planning_python_script)
+        return planning_python_script
+        # except:
+        #     raise Exception("Making expected answer went wrong. ")
 
-    def run_all(self):
+    def make_plan(self):
         detected_object, detected_object_types = self.detect_object()
         active_predicates, detected_object_predicates = self.get_active_predicates(detected_object=detected_object)
         object_class_python_script = self.get_predicates(detected_object=detected_object,
@@ -258,11 +264,13 @@ class ChangminPlanner:
 
         if self.is_save:
             self.check_result_folder()
+            cv2.imwrite(os.path.join(self.result_dir, "annotated_image.jpg"), self.anno_image)
             self.log_answer()
             file_path = os.path.join(self.result_dir, "planning.py")
             with open(file_path, "w") as file:
                 file.write(str(object_class_python_script) + "\n\n")
-                file.write(str(robot_class_python_script) + "\n\n")
+                file.write(str(robot_class_python_script) + "\n")
+                file.write("    def dummy(self):\n        pass\n\n\n")
                 file.write(str(init_state_python_script) + "\n\n")
                 file.write(str(planning_python_script) + "\n")
                 file.close()
@@ -272,10 +280,78 @@ class ChangminPlanner:
         with open(log_txt_path, "w") as file:
             file.write(tabulate(self.table))
             file.write("\n")
-            file.write("-"*50 + "\n")
+            file.write("-" * 50 + "\n")
             for q, a in zip(self.question, self.answer):
-                file.write(q + "\n")
+                file.write(q + "\n\n")
                 file.write(a + "\n")
-                file.write("-"*50 + "\n")
-
+                file.write("-" * 50 + "\n")
             file.close()
+
+    def planning_feedback(self):
+
+        # robot_actions = self.robot_data["actions"]
+        # task_instructions = self.task_data["instructions"]
+
+        file_path = os.path.join(self.result_dir, "planning.py")
+        with open(file_path, "r") as file:
+            content = file.read()
+            file.close()
+
+        process = subprocess.Popen(["python", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+        if error:
+            print("Error occurred")
+            planning_output = output.decode('utf-8') + "\n" + error.decode('utf-8')
+            prompt, new_planning = self.robot_action_feedback(python_script=content, planning_output=planning_output)
+            new_plan = self.replace_string(content, new_planning, "def")
+            print(new_plan)
+
+        else:
+            planning_output = output.decode('utf-8') + "\n"
+            print(True)
+            prompt, new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
+
+        if self.is_save:
+            file_path = os.path.join(self.result_dir, "feedback_prompt_3.txt")
+            with open(file_path, "w") as file:
+                file.write(str(prompt) + "\n\n")
+                file.write("-" * 100 + "\n\n")
+                file.write(str(new_planning) + "\n\n")
+                file.close()
+
+    def robot_action_feedback(self, python_script, planning_output):
+        self.gpt_interface_pddl.reset_message()
+        prompt = self.load_prompt.load_prompt_action_feedback(python_script=python_script,
+                                                              planning_output=planning_output)
+        # self.gpt_interface_pddl.add_example_prompt("robot_feedback")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        robot_action_feedback = self.gpt_interface_pddl.run_prompt()
+
+        return prompt, robot_action_feedback
+
+    def direct_planner_feedback(self, python_script, planning_output):
+        self.gpt_interface_pddl.reset_message()
+        prompt = self.load_prompt.load_prompt_planner_feedback(python_script=python_script,
+                                                               planning_output=planning_output)
+        self.gpt_interface_pddl.add_example_prompt("planner_feedback")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        planner_feedback = self.gpt_interface_pddl.run_prompt()
+
+        return prompt, planner_feedback
+
+    @staticmethod
+    def replace_string(content, replace_part, end_part):
+        fline_index = replace_part.find("\n")
+        replace_def = replace_part[fline_index]
+
+        start_index = content.find(replace_def)
+        end_index = content.find(end_part, start_index + 1)
+        if end_index == -1:
+            end_index = len(content)
+
+        before = content[:start_index]
+        middle = replace_part
+        after = content[end_index:]
+
+        replaced_script = before + middle + "\n\t" + after
+        return replaced_script

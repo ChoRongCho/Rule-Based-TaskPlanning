@@ -13,7 +13,7 @@ def parse_args_v2():
     # additional path
     parser.add_argument("--data_dir", type=str, default="/home/changmin/PycharmProjects/GPT_examples/data", help="")
     parser.add_argument("--json_dir", type=str, default="/home/changmin/PycharmProjects/GPT_examples/data/json", help="")
-    parser.add_argument("--result_dir", type=str, default="/home/changmin/PycharmProjects/GPT_examples/result", help="")
+    parser.add_argument("--result_dir", type=str, default="/home/changmin/PycharmProjects/GPT_examples/result/train", help="")
     parser.add_argument("--input_image", type=str, default=None, help="image name from data_dir")
 
     # json_dir

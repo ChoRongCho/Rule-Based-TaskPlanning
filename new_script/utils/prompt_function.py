@@ -1,49 +1,3 @@
-def load_prompt(mode,
-                task: str,
-                task_description: str,
-                detected_object=False,
-                detected_object_types=False,
-                max_predicates=3,
-                python_script_code=False,
-                rule=False):
-    if mode == "detect_object" or 0:
-        prompt = f"We are now doing a {task} task which is {task_description}. \n"
-        prompt += "This is a first observation where I work in. \n"
-        prompt += "What objects or tools are here? \n"
-        return prompt
-
-    elif mode == "get_predicates" or 1:
-        prompt = f"We are now going to do a {task} task whose goal is {task_description}"
-        prompt += "There are many objects in this domain, " + \
-                  "this is object information that comes from image observation. \n"
-        prompt += f"1. {detected_object_types} \n2. {detected_object}\n"
-        prompt += f"""from dataclasses import dataclass
-            
-    
-@dataclass
-class Object:
-    # Basic dataclass
-    index: int
-    name: str
-    location: tuple
-    size: tuple
-    color: str or bool
-    object_type: str
-    
-    # Object physical properties predicates
-    
-    # {task} Predicates (max {max_predicates})"""
-        prompt += "However, we cannot do complete planning with this dataclass predicate alone" + \
-                  f" that means we have to add another predicates that fully describe the {task}."
-
-        return prompt
-
-    elif mode == "get_robot_action_conditions" or 2:
-        prompt = ""
-
-        return prompt
-
-
 class PromptSet:
     def __init__(self, task, task_description):
         self.task = task
@@ -187,4 +141,27 @@ class Robot:
 {task_instruction}\n"""
 
         prompt += "Make a plan under the if __name__ == '__main__':. \nYou must make a correct order. \n"
+        return prompt
+
+    def load_prompt_action_feedback(self, python_script, planning_output):
+        prompt = f"We made a plan for a {self.task} and our goal is {self.task_description}. \n"
+        prompt += f"Below is the Python code for it. \n\n"
+        prompt += python_script + " \n"
+
+        prompt += "And this is a result. \n"
+        prompt += planning_output + " \n"
+
+        prompt += "We find that there is an error in the robot action part that describes the preconditions and " + \
+                  "effects of the action. \n"
+        prompt += "Please modify the action preconditions if they use preconditions that the Object class doesn't use. \n"
+        return prompt
+
+    def load_prompt_planner_feedback(self, python_script, planning_output):
+        prompt = f"We made a plan for a {self.task} and our goal is {self.task_description}. \n"
+        prompt += f"Below is the Python code for it. \n\n"
+        prompt += python_script + " \n"
+
+        prompt += "And this is a result. \n"
+        prompt += planning_output + " \n"
+
         return prompt
