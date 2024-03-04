@@ -1,6 +1,5 @@
 import json
 import os
-import re
 import subprocess
 from datetime import datetime
 
@@ -299,31 +298,30 @@ class ChangminPlanner:
 
         process = subprocess.Popen(["python", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
-        if error:
-            print("Error occurred")
+        if error:  # robot action re-definition
             planning_output = output.decode('utf-8') + "\n" + error.decode('utf-8')
             prompt, new_planning = self.robot_action_feedback(python_script=content, planning_output=planning_output)
             new_plan = self.replace_string(content, new_planning, "def")
-            print(new_plan)
 
         else:
+            print("AAAAAAAAAAAAAAAAAAAAAAA")
             planning_output = output.decode('utf-8') + "\n"
-            print(True)
             prompt, new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
+            new_plan = new_planning
 
         if self.is_save:
-            file_path = os.path.join(self.result_dir, "feedback_prompt_3.txt")
+            file_path = os.path.join(self.result_dir, "feedback_prompt_2.txt")
             with open(file_path, "w") as file:
                 file.write(str(prompt) + "\n\n")
                 file.write("-" * 100 + "\n\n")
-                file.write(str(new_planning) + "\n\n")
+                file.write(str(new_plan) + "\n\n")
                 file.close()
 
     def robot_action_feedback(self, python_script, planning_output):
         self.gpt_interface_pddl.reset_message()
         prompt = self.load_prompt.load_prompt_action_feedback(python_script=python_script,
                                                               planning_output=planning_output)
-        # self.gpt_interface_pddl.add_example_prompt("robot_feedback")
+        self.gpt_interface_pddl.add_example_prompt("robot_feedback")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
         robot_action_feedback = self.gpt_interface_pddl.run_prompt()
 
@@ -332,8 +330,10 @@ class ChangminPlanner:
     def direct_planner_feedback(self, python_script, planning_output):
         self.gpt_interface_pddl.reset_message()
         prompt = self.load_prompt.load_prompt_planner_feedback(python_script=python_script,
-                                                               planning_output=planning_output)
-        self.gpt_interface_pddl.add_example_prompt("planner_feedback")
+                                                               planning_output=planning_output,
+                                                               robot_action=self.robot_data["actions"],
+                                                               task_instruction=self.task_data["instructions"])
+        # self.gpt_interface_pddl.add_example_prompt("planner_feedback")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
         planner_feedback = self.gpt_interface_pddl.run_prompt()
 
@@ -342,7 +342,7 @@ class ChangminPlanner:
     @staticmethod
     def replace_string(content, replace_part, end_part):
         fline_index = replace_part.find("\n")
-        replace_def = replace_part[fline_index]
+        replace_def = replace_part[:fline_index]
 
         start_index = content.find(replace_def)
         end_index = content.find(end_part, start_index + 1)
@@ -353,5 +353,17 @@ class ChangminPlanner:
         middle = replace_part
         after = content[end_index:]
 
-        replaced_script = before + middle + "\n\t" + after
+        replaced_script = before + middle + "\n\n\t" + after
         return replaced_script
+
+    def just_chat(self, message):
+
+        self.gpt_interface_pddl.reset_message()
+        self.gpt_interface_pddl.add_message(role="user", content=message, image_url=False)
+        answer = self.gpt_interface_pddl.run_prompt()
+
+        return answer
+
+
+
+
