@@ -14,7 +14,7 @@ def main():
 
     planner = ChangminPlanner(args=args)
     # planner.make_plan()
-    # planner.planning_feedback()
+    planner.planning_feedback()
 
     message = "how to get nagelkerke R-squared in stata using logistic regression?"
     answer = planner.just_chat(message=message)

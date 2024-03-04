@@ -304,7 +304,6 @@ class ChangminPlanner:
             new_plan = self.replace_string(content, new_planning, "def")
 
         else:
-            print("AAAAAAAAAAAAAAAAAAAAAAA")
             planning_output = output.decode('utf-8') + "\n"
             prompt, new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
             new_plan = new_planning
@@ -324,7 +323,6 @@ class ChangminPlanner:
         self.gpt_interface_pddl.add_example_prompt("robot_feedback")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
         robot_action_feedback = self.gpt_interface_pddl.run_prompt()
-
         return prompt, robot_action_feedback
 
     def direct_planner_feedback(self, python_script, planning_output):
