@@ -130,6 +130,31 @@ class ChangminPlanner:
         detected_object, self.anno_image = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
         return detected_object, result_dict
 
+    def get_active_predicates(self, detected_object):
+        """
+        random sampled active predicates
+        
+        :param detected_object:     
+        input_dict = {0: {'white box': [509, 210, 231, 323]},
+                      1: {'blue object': [204, 220, 361, 247]},
+                      2: {'yellow object': [83, 158, 135, 216]},
+                      3: {'brown object': [257, 95, 139, 148]}}
+        :return: 
+        active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
+        detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}        
+        """
+        detected_object_predicates = {}
+        for index, info in detected_object.items():
+            info = self.robot.active_search(info)
+            detected_object_predicates.update({index: info})
+
+        # Removing duplicate predicates.
+        tempt_list = list(detected_object_predicates.values())
+        flattened_list = [item for sublist in tempt_list for item in sublist]
+        active_predicates = list(set(flattened_list))
+
+        return active_predicates, detected_object_predicates
+
     def get_predicates(self, detected_object, detected_object_types, active_predicates):
         """
 
@@ -164,31 +189,6 @@ class ChangminPlanner:
                 return object_class_python_script
             except:
                 raise Exception("Making expected answer went wrong. ")
-
-    def get_active_predicates(self, detected_object):
-        """
-        random sampled active predicates
-        
-        :param detected_object:     
-        input_dict = {0: {'white box': [509, 210, 231, 323]},
-                      1: {'blue object': [204, 220, 361, 247]},
-                      2: {'yellow object': [83, 158, 135, 216]},
-                      3: {'brown object': [257, 95, 139, 148]}}
-        :return: 
-        active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
-        detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}        
-        """
-        detected_object_predicates = {}
-        for index, info in detected_object.items():
-            info = self.robot.active_search(info)
-            detected_object_predicates.update({index: info})
-
-        # Removing duplicate predicates.
-        tempt_list = list(detected_object_predicates.values())
-        flattened_list = [item for sublist in tempt_list for item in sublist]
-        active_predicates = list(set(flattened_list))
-
-        return active_predicates, detected_object_predicates
 
     def get_robot_action_conditions(self, object_class_python_script):
         self.gpt_interface_pddl.reset_message()
@@ -262,8 +262,6 @@ class ChangminPlanner:
                                                            init_state_python_script=init_state_python_script)
 
         if self.is_save:
-            self.check_result_folder()
-            cv2.imwrite(os.path.join(self.result_dir, "annotated_image.jpg"), self.anno_image)
             self.log_answer()
             file_path = os.path.join(self.result_dir, "planning.py")
             with open(file_path, "w") as file:
@@ -275,6 +273,9 @@ class ChangminPlanner:
                 file.close()
 
     def log_answer(self):
+        self.check_result_folder()
+        cv2.imwrite(os.path.join(self.result_dir, "annotated_image.jpg"), self.anno_image)
+
         log_txt_path = os.path.join(self.result_dir, "prompt.txt")
         with open(log_txt_path, "w") as file:
             file.write(tabulate(self.table))
@@ -361,7 +362,3 @@ class ChangminPlanner:
         answer = self.gpt_interface_pddl.run_prompt()
 
         return answer
-
-
-
-

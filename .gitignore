@@ -1,7 +1,6 @@
 class_pracc.py
 data/json/setting.json
 my_personal.json
-data/
 .vscode/
 response/my_vision
 response/20240220_robot_action
