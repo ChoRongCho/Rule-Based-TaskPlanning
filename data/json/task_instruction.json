@@ -1,0 +1,72 @@
+{
+  "bin_packing": {
+    "script": {
+      "task_description": "packing yellow, blue, brown objects into the box called bin, not a black object. ",
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    },
+    "example": {
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    },
+    "instructions" : {
+    "rule0": "you should never pick and place a box",
+    "rule1": "when place a fragile objects, the soft objects must be in the bin",
+    "rule2": "when fold a object, the object must be foldable",
+    "rule3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted",
+    "rule4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object"
+    }
+  },
+
+  "blocksworld" : {
+    "script": {
+      "task_description": "stacking blocks. \n",
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    },
+    "example": {
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    }
+  },
+
+  "hanoi" : {
+    "script": {
+      "task_description": "stacking disks in order from the big ones. \n",
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    },
+    "example": {
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    }
+  },
+
+  "cooking" : {
+    "script": {
+      "task_description": "cooking foods using given ingredients. In our case, we are only doing slice. \n",
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    },
+    "example": {
+      "vision_prompt": "",
+      "behaviour_prompt": "",
+      "action_prompt": "",
+      "pddl_prompt": ""
+    }
+  }
+}

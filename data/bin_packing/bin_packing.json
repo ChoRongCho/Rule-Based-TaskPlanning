@@ -1,0 +1,16 @@
+{
+  "task": "bin_packing",
+  "script": {
+    "task_description": "packing all target objects into the box called bin. ",
+    "vision_prompt": "",
+    "behaviour_prompt": "",
+    "action_prompt": "",
+    "pddl_prompt": ""
+  },
+  "example": {
+    "vision_prompt": "",
+    "behaviour_prompt": "",
+    "action_prompt": "",
+    "pddl_prompt": ""
+  }
+}

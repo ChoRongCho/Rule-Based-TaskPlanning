@@ -1,0 +1,16 @@
+{
+  "task": "cooking",
+  "script": {
+    "task_description": "cooking foods using given ingredients. In our case, we are only doing slice. \n",
+    "vision_prompt": "",
+    "behaviour_prompt": "",
+    "action_prompt": "",
+    "pddl_prompt": ""
+  },
+  "example": {
+    "vision_prompt": "",
+    "behaviour_prompt": "",
+    "action_prompt": "",
+    "pddl_prompt": ""
+  }
+}
