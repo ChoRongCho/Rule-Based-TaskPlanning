@@ -1,5 +1,6 @@
 class_pracc.py
 data/json/setting.json
+data/json/setting_creative.json
 my_personal.json
 .vscode/
 response/my_vision
