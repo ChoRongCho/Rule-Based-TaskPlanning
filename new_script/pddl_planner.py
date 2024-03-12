@@ -76,13 +76,16 @@ class PDDLPlanner(ChangminPlanner):
         predicates_pddl = self.get_predicates1(detected_object=detected_object,
                                                detected_object_types=detected_object_types,
                                                active_predicates=active_predicates)
-        grounded_predicates = self.get_predicates2(predicates_pddl=predicates_pddl)
-        print(grounded_predicates)
+
+        print(predicates_pddl)
+        # grounded_predicates = self.get_predicates2(predicates_pddl=predicates_pddl)
+        # print(grounded_predicates)
 
         # get robot action pddl
-        domain_pddl = self.get_robot_action_conditions(grounded_predicates=grounded_predicates)
-        return domain_pddl
+        # domain_pddl = self.get_robot_action_conditions(grounded_predicates=grounded_predicates)
+        # return domain_pddl
 
+        return False
 
     def generate_problem_pddl(self, domain_pddl):
         # generate problem.pddl using generated pddl
@@ -94,5 +97,5 @@ class PDDLPlanner(ChangminPlanner):
 
         return problem_pddl
 
-    
+
 

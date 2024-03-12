@@ -1,0 +1,10 @@
+
+Traceback (most recent call last):
+  File "/home/changmin/PycharmProjects/GPT_examples/result/train/20240308_val_problem6_1/planning.py", line 195, in <module>
+    robot.push(object2)
+  File "/home/changmin/PycharmProjects/GPT_examples/result/train/20240308_val_problem6_1/planning.py", line 89, in push
+    if not self.robot_handempty or obj.is_rigid or obj.is_fragile:
+                                                   ^^^^^^^^^^^^^^
+AttributeError: 'Object' object has no attribute 'is_fragile'
+
+

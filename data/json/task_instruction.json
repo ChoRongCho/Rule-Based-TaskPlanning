@@ -1,17 +1,7 @@
 {
   "bin_packing": {
     "script": {
-      "task_description": "packing yellow, blue, brown objects into the box called bin, not a black object. ",
-      "vision_prompt": "",
-      "behaviour_prompt": "",
-      "action_prompt": "",
-      "pddl_prompt": ""
-    },
-    "example": {
-      "vision_prompt": "",
-      "behaviour_prompt": "",
-      "action_prompt": "",
-      "pddl_prompt": ""
+      "task_description": "packing yellow, blue, brown objects into the box called bin, not a black object. "
     },
     "instructions" : {
     "rule0": "you should never pick and place a box",
@@ -19,6 +9,24 @@
     "rule2": "when fold a object, the object must be foldable",
     "rule3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted",
     "rule4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object"
+    },
+    "instructions_sample1" : {
+    "rule0": "don't pick and place a box called bin",
+    "rule1": "when place a rigid objects in the bin, the soft objects must be in the bin",
+    "rule2": "when fold a object, the fragile object must be in the bin ",
+    "rule3": "when a rigid object in the bin at the initial state, out the rigid object and replace it into the bin ",
+    "rule4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object"
+    },
+    "instructions_sample2" : {
+    "rule0": "you should never pick and place a box",
+    "rule1": "before place a elastic object, push a elastic object ",
+    "rule2": "do not place a fragile object if there is no elastic object in the bin",
+    "rule3": "when push a object, neither fragile and rigid objects are permitted"
+    },
+    "goal": {
+      "goal1": "packing all objects into the bin",
+      "goal2": "if there is a black object, don't packing it",
+      "goal3": ""
     }
   },
 

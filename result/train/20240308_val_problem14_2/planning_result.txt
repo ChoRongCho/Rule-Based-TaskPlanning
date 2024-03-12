@@ -1,0 +1,9 @@
+Out blue object from white box
+Place blue object out of the box
+Pick brown object
+Place brown object out of the box
+Pick red object
+Place red object out of the box
+
+
+

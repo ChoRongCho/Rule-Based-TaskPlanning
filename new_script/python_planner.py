@@ -1,6 +1,6 @@
 import os
 import subprocess
-from changmin_planner import ChangminPlanner
+from new_script.changmin_planner import ChangminPlanner
 
 
 class PythonPlanner(ChangminPlanner):
@@ -35,4 +35,5 @@ class PythonPlanner(ChangminPlanner):
         return planning_output
 
     def feedback(self):
-        self.planning_feedback()
+        for i in range(3):
+            self.planning_feedback()

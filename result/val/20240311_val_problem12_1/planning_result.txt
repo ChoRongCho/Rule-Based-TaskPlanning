@@ -1,0 +1,8 @@
+Pick yellow object
+Place yellow object in white box
+Push yellow object
+Pick blue object
+Place blue object in white box
+
+
+

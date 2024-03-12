@@ -1,0 +1,13 @@
+Out brown object from white box
+Place brown object out of the box
+Pick brown object
+
+Traceback (most recent call last):
+  File "/home/changmin/PycharmProjects/GPT_examples/result/val/20240311_val_problem12_2/planning.py", line 217, in <module>
+    robot.place(object4, bin1)
+  File "/home/changmin/PycharmProjects/GPT_examples/result/val/20240311_val_problem12_2/planning.py", line 75, in place
+    if obj.is_fragile and not self.is_soft_in_bin:
+       ^^^^^^^^^^^^^^
+AttributeError: 'Object' object has no attribute 'is_fragile'
+
+

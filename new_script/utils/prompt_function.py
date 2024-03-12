@@ -189,7 +189,7 @@ class PromptSetPDDL:
         return prompt
 
     def load_prompt_get_predicates(self, detected_object, detected_object_types, active_predicates: List or bool):
-        prompt = f"We are now going to do a {self.task} task whose goal is {self.task_description}"
+        prompt = f"Q. We are now going to do a {self.task} task whose goal is {self.task_description}"
         prompt += "There are many objects in this domain, " + \
                   "this is object information that comes from image observation. \n"
         prompt += f"1. {detected_object_types} \n2. {detected_object}\n"
@@ -206,7 +206,8 @@ class PromptSetPDDL:
 
         ; object property predicates
 
-        ; add other predicates if you need
+        ; result of object property after action
+        
     )\n\n
 """
         if active_predicates:

@@ -8,7 +8,7 @@ from openai import OpenAI
 from tabulate import tabulate
 
 from new_script.gpt_model.gpt_interface import GPTInterpreter
-from new_script.temp_robot.robot import Robot
+from new_script.temp_robot.robot_predicates_prove import RobotProve
 from new_script.utils.prompt_function import PromptSet
 from new_script.utils.utils import parse_input
 from new_script.visual_interpreting.visual_interpreter import FindObjects
@@ -24,6 +24,7 @@ class ChangminPlanner:
         self.is_save = args.is_save
         self.max_predicates = args.max_predicates
         self.patience_repeat = 3
+        self.planning_repeat = 0
 
         # basic path
         self.args = args
@@ -66,9 +67,9 @@ class ChangminPlanner:
                                                  version="pddl")
         self.grounding_dino = FindObjects(is_save=self.is_save)
         self.load_prompt = PromptSet(task=self.task, task_description=self.task_description)
-        self.robot = Robot(name=self.robot_data["name"],
-                           goal=self.robot_data["goal"],
-                           actions=self.robot_data["actions"])
+        self.robot = RobotProve(name=self.robot_data["name"],
+                                goal=self.robot_data["goal"],
+                                actions=self.robot_data["actions"])
         self.print_args()
 
     def print_args(self):
@@ -130,11 +131,12 @@ class ChangminPlanner:
         detected_object, self.anno_image = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
         return detected_object, result_dict
 
-    def get_active_predicates(self, detected_object):
+    def get_active_predicates(self, detected_object, random_mode=True):
         """
         random sampled active predicates
         
-        :param detected_object:     
+        :param random_mode:
+        :param detected_object:
         input_dict = {0: {'white box': [509, 210, 231, 323]},
                       1: {'blue object': [204, 220, 361, 247]},
                       2: {'yellow object': [83, 158, 135, 216]},
@@ -143,10 +145,17 @@ class ChangminPlanner:
         active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
         detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}        
         """
-        detected_object_predicates = {}
-        for index, info in detected_object.items():
-            info = self.robot.active_search(info)
-            detected_object_predicates.update({index: info})
+        if random_mode:
+            detected_object_predicates = {}
+            for index, info in detected_object.items():
+                info = self.robot.random_active_search(info)
+                detected_object_predicates.update({index: info})
+
+        else:  # Do robot active prove
+            detected_object_predicates = {}
+            for index, info in detected_object.items():
+                info = self.robot.get_object_predicates(info)
+                detected_object_predicates.update({index: info})
 
         # Removing duplicate predicates.
         tempt_list = list(detected_object_predicates.values())
@@ -292,28 +301,37 @@ class ChangminPlanner:
         # robot_actions = self.robot_data["actions"]
         # task_instructions = self.task_data["instructions"]
 
-        file_path = os.path.join(self.result_dir, "planning.py")
+        if self.planning_repeat == 0:
+            file_path = os.path.join(self.result_dir, "planning.py")
+            self.planning_repeat += 1
+        else:
+            file_path = os.path.join(self.result_dir, f"planning_{self.planning_repeat}.py")
+            self.planning_repeat += 1
         with open(file_path, "r") as file:
             content = file.read()
             file.close()
 
+        # Get planning result
         process = subprocess.Popen(["python", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         if error:  # robot action re-definition
             planning_output = output.decode('utf-8') + "\n" + error.decode('utf-8')
             prompt, new_planning = self.robot_action_feedback(python_script=content, planning_output=planning_output)
             new_plan = self.replace_string(content, new_planning, "def")
+            print(planning_output, "\n")
+            print(new_planning)
+            print("-"*90)
 
         else:
             planning_output = output.decode('utf-8') + "\n"
             prompt, new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
             new_plan = new_planning
+            print(new_plan)
+            print("-" * 90)
 
         if self.is_save:
-            file_path = os.path.join(self.result_dir, "feedback_prompt_2.txt")
-            with open(file_path, "w") as file:
-                file.write(str(prompt) + "\n\n")
-                file.write("-" * 100 + "\n\n")
+            new_file_path = os.path.join(self.result_dir, f"planning_{self.planning_repeat}.py")
+            with open(new_file_path, "w") as file:
                 file.write(str(new_plan) + "\n\n")
                 file.close()
 
@@ -362,3 +380,89 @@ class ChangminPlanner:
         answer = self.gpt_interface_pddl.run_prompt()
 
         return answer
+
+    def get_object_predicates(self, info):
+        pass
+
+    def goal_state_encoding(self, message):
+        prompt = """# Object 1
+bin1 = Object(
+    index=0,
+    name='white box',
+    location=(516, 201),
+    size=(238, 334),
+    color='white',
+    object_type='box',
+    is_elastic=True,
+    is_rigid=True,
+    in_bin=True
+)
+
+# Object 2
+object2 = Object(
+    index=1,
+    name='yellow object',
+    location=(280, 134),
+    size=(227, 221),
+    color='yellow',
+    object_type='object',
+    is_foldable=True,
+    out_bin=True
+)
+
+# Object 3
+object3 = Object(
+    index=2,
+    name='black object',
+    location=(79, 275),
+    size=(151, 113),
+    color='black',
+    object_type='object',
+    is_rigid=True,
+    out_bin=True,
+    is_black=True
+)
+
+# Object 4
+object4 = Object(
+    index=3,
+    name='brown object',
+    location=(503, 205),
+    size=(147, 153),
+    color='brown',
+    object_type='object',
+    is_rigid=True,
+    is_elastic=True,
+    in_bin=True
+)
+
+# Object 5
+object5 = Object(
+    index=4,
+    name='blue object',
+    location=(223, 209),
+    size=(355, 244),
+    color='blue',
+    object_type='object',
+    is_soft=True,
+    out_bin=True
+)\n
+"""
+        prompt += "This is a initial state of bin_packing task. \n"
+        prompt += "We are now doing a bin_packing and our goal is listed below. \n\n"
+
+        goal_prompt = self.task_data["goal"]
+        prompt += str(goal_prompt)
+        prompt += "\nUsing init state and natural instruction of goal, make a goal state represented as a python script. \n"
+        print(prompt)
+        self.gpt_interface_pddl.reset_message()
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+        answer = self.gpt_interface_pddl.run_prompt()
+        print("-"*90)
+        print(answer)
+
+    def init_state_encoding(self):
+        pass
+
+
+

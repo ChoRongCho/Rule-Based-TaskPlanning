@@ -1,0 +1,9 @@
+Fold black object
+Pick black object
+Place black object out of the box
+Pick brown object
+Place brown object out of the box
+Push brown object
+
+
+

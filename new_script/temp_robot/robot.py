@@ -68,7 +68,7 @@ class Robot:
             return self.random_predicates(obj_info)
         return selected_predicates
 
-    def active_search(self, obj_info):
+    def random_active_search(self, obj_info):
         selected_predicates = self.random_predicates(obj_info)
         return selected_predicates
 
