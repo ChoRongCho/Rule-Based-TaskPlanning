@@ -1,4 +1,0 @@
-{
-    "name": "problem16test_2",
-    "answer": "A. Bin_packing is a task that involves packing objects into a bin. To perform bin_packing, we need to identify the objects and the bin. \n\nObjects_out_box: yellow object, blue object\nObjects_in_box: white object\nBin: The bin is the white box in the image."
-}

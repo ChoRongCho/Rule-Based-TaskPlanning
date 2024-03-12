@@ -1,8 +1,0 @@
-{
-    "name": "blocksworld",
-    "prompt": {
-        "predicates": "Hi, my name is UR5, and I am a robot. \nOur goal is , which is called blocksworld. In a problem instance, there are blocks and a manipulator robot(it's me!). \nI want to define a domain name as blocksworld.We want to consider the predicates such as on, ontable, clear, handempty, handfull, and holding. \nGiven this goal, I want to make a domain.pddl. \nActions must consider the predicates in preconditions and effects. \n",
-        "instruction": "Now, I'm going to talk about precautions when doing blocksworld. \nDuring solving a block problem, I must follow several rules. \nFirst, I must pick up a free block, that means on the block there must be nothing, and I will call it clear. \nSecond, I can not hold two blocks at once. \nThird, to pick up an underlying block, I have to grab a block above and put it down on the table.\nFourth, to stack a block on the another block, it must be clear. \nFifth, to unstack a block, a block must be clear. \nThe actions I can do are pick-up, put-down, stack, and unstack. \nWhen you define action in domain.pddl, you must use that action set. No other actions is permitted. \n",
-        "pddl": "Please generate the only pddl without any explanation to return your answer to pddl file. \nNever add your any word to pddl file. \n"
-    }
-}

@@ -1,8 +1,8 @@
 import random
 
-# from new_script.pddl_planner import PDDLPlanner
-from new_script.python_planner import PythonPlanner
-from new_script.utils.utils import parse_args_v2
+# from scripts.pddl_planner import PDDLPlanner
+from scripts.python_planner import PythonPlanner
+from scripts.utils.utils import parse_args_v2
 
 
 def main():
