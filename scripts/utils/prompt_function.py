@@ -130,20 +130,25 @@ class Robot:
                              object_class_python_script,
                              robot_class_python_script,
                              init_state_python_script,
+                             init_state_table,
+                             goal_state_table,
                              robot_action,
                              task_instruction):
+
         prompt = f"{object_class_python_script}\n\n"
         prompt += f"{robot_class_python_script}\n\n"
         prompt += f"{init_state_python_script}\n\n"
+
         prompt += "if __name__ == '__main__':\n\t# packing all object in the box\n\t# make a plan\n"
 
-        prompt += f"Your goal is {self.task_description}. \n"
+        # prompt += f"Your goal is {self.task_description}. \n"
         prompt += "You must follow the rule: \n"
         prompt += f"""
 {robot_action}
 {task_instruction}\n"""
 
         prompt += "Make a plan under the if __name__ == '__main__':. \nYou must make a correct order. \n"
+        prompt += f"{init_state_table}\n\n{goal_state_table}\n"
         return prompt
 
     def load_prompt_action_feedback(self, python_script, planning_output):
@@ -174,6 +179,16 @@ class Robot:
 
         prompt += "Please re-planning under the if __name__ == '__main__' part. \n"
 
+        return prompt
+
+    def load_prompt_gs_encoding(self, init_state_table, goal_instructions, task_instruction):
+        prompt = f"{init_state_table}\n\n"
+        prompt += f"This is an. initial state of {self.task} task. \n"
+        prompt += "We are now doing a bin_packing and our goal is listed below. \n\n"
+        prompt += f"{goal_instructions}\n\n"
+        prompt += "And, this is rules that when you do actions. \n"
+        prompt += f"{task_instruction}\n"
+        prompt += f"Create and return a goal state of objects for {self.task}. \n"
         return prompt
 
 

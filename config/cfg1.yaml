@@ -1,0 +1,13 @@
+task_name: bin_packing
+exp_name: 20240311_val_problem12_2
+is_save: True
+max_predicates: 5
+data_dir: /home/changmin/PycharmProjects/GPT_examples/data
+json_dir: /home/changmin/PycharmProjects/GPT_examples/data/json
+result_dir: /home/changmin/PycharmProjects/GPT_examples/result/val
+input_image: val/problem12.jpg
+api_json: setting.json
+example_prompt_json: prompt_examples_python.json
+robot_json: robot.json
+task_json: task_instruction.json
+seed: 42

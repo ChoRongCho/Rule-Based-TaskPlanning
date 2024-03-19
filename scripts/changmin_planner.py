@@ -110,6 +110,7 @@ class ChangminPlanner:
         for i in range(self.patience_repeat):
             try:
                 answer = self.gpt_interface_vision.run_prompt()
+                print(answer)
                 result_dict, result_list = parse_input(answer=answer)
 
                 self.question.append(prompt)
@@ -118,7 +119,6 @@ class ChangminPlanner:
                 return result_dict, result_list
             except:
                 raise Exception("Making expected answer went wrong. ")
-        # return result_dict, result_list
 
     def detect_object(self):
         """
@@ -218,42 +218,70 @@ class ChangminPlanner:
 
     def get_init_state(self,
                        detected_object,
-                       detected_object_types,
-                       detected_object_predicates,
-                       object_class_python_script):
+                       do_types,
+                       do_predicates,
+                       oc_python_script):
         self.gpt_interface_pddl.reset_message()
         prompt = self.load_prompt.load_prompt_init_state(detected_object=detected_object,
-                                                         detected_object_types=detected_object_types,
-                                                         detected_object_predicates=detected_object_predicates,
-                                                         object_class_python_script=object_class_python_script)
+                                                         detected_object_types=do_types,
+                                                         detected_object_predicates=do_predicates,
+                                                         object_class_python_script=oc_python_script)
         self.gpt_interface_pddl.add_example_prompt("init_state_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
-        # for i in range(self.patience_repeat):
-        #     try:
-        init_state_python_script = self.gpt_interface_pddl.run_prompt()
-        self.question.append(prompt)
-        self.answer.append(init_state_python_script)
-        return init_state_python_script
-        # except:
-        #     raise Exception("Making expected answer went wrong. ")
 
-    def planning_from_domain(self, object_class_python_script, robot_class_python_script, init_state_python_script):
+        # run prompt
+        init_state_script = self.gpt_interface_pddl.run_prompt()
+        self.question.append(prompt)
+        self.answer.append(init_state_script)
+
+        # split a text
+        init_state_python_code, init_state_table = init_state_script.split("Table")
+        init_state_python_code = init_state_python_code.replace("Python Code", "").strip()
+        init_state_table = init_state_table.strip()
+
+        return init_state_python_code, init_state_table
+
+    def goal_state_encoding(self, init_state_table):
+        self.gpt_interface_pddl.reset_message()
+
+        # get example message1
+        prompt = self.load_prompt.load_prompt_gs_encoding(init_state_table,
+                                                          self.task_data["goal"],
+                                                          self.task_data["instructions"])
+
+        # add example and prompt
+        self.gpt_interface_pddl.add_example_prompt("goal_encoding")
+        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+
+        # run prompt
+        goal_state = self.gpt_interface_pddl.run_prompt()
+        self.question.append(prompt)
+        self.answer.append(goal_state)
+        return goal_state
+
+    def planning_from_domain(self,
+                             object_class_python_script,
+                             robot_class_python_script,
+                             init_state_python_script,
+                             init_state_table,
+                             goal_state_table):
+
         self.gpt_interface_pddl.reset_message()
         prompt = self.load_prompt.load_prompt_planning(object_class_python_script=object_class_python_script,
                                                        robot_class_python_script=robot_class_python_script,
                                                        init_state_python_script=init_state_python_script,
+                                                       init_state_table=init_state_table,
+                                                       goal_state_table=goal_state_table,
                                                        robot_action=self.robot_data["actions"],
                                                        task_instruction=self.task_data["instructions"])
+
         self.gpt_interface_pddl.add_example_prompt("domain_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
-        # for i in range(self.patience_repeat):
-        #     try:
+
         planning_python_script = self.gpt_interface_pddl.run_prompt()
         self.question.append(prompt)
         self.answer.append(planning_python_script)
         return planning_python_script
-        # except:
-        #     raise Exception("Making expected answer went wrong. ")
 
     def make_plan(self):
         detected_object, detected_object_types = self.detect_object()
@@ -262,13 +290,17 @@ class ChangminPlanner:
                                                          detected_object_types=detected_object_types,
                                                          active_predicates=active_predicates)
         robot_class_python_script = self.get_robot_action_conditions(object_class_python_script)
-        init_state_python_script = self.get_init_state(detected_object=detected_object,
-                                                       detected_object_types=detected_object_types,
-                                                       detected_object_predicates=detected_object_predicates,
-                                                       object_class_python_script=object_class_python_script)
+        init_state_python_script, init_state_table = self.get_init_state(detected_object=detected_object,
+                                                                         do_types=detected_object_types,
+                                                                         do_predicates=detected_object_predicates,
+                                                                         oc_python_script=object_class_python_script)
+        goal_state = self.goal_state_encoding(init_state_table=init_state_table)
+
         planning_python_script = self.planning_from_domain(object_class_python_script=object_class_python_script,
                                                            robot_class_python_script=robot_class_python_script,
-                                                           init_state_python_script=init_state_python_script)
+                                                           init_state_python_script=init_state_python_script,
+                                                           init_state_table=init_state_table,
+                                                           goal_state_table=goal_state)
 
         if self.is_save:
             self.log_answer()
@@ -320,7 +352,7 @@ class ChangminPlanner:
             new_plan = self.replace_string(content, new_planning, "def")
             print(planning_output, "\n")
             print(new_planning)
-            print("-"*90)
+            print("-" * 90)
 
         else:
             planning_output = output.decode('utf-8') + "\n"
@@ -373,96 +405,19 @@ class ChangminPlanner:
         replaced_script = before + middle + "\n\n\t" + after
         return replaced_script
 
-    def just_chat(self, message):
+    def just_chat(self, message, role="user"):
 
         self.gpt_interface_pddl.reset_message()
-        self.gpt_interface_pddl.add_message(role="user", content=message, image_url=False)
+        self.gpt_interface_pddl.add_message(role=role, content=message, image_url=False)
         answer = self.gpt_interface_pddl.run_prompt()
 
         return answer
 
-    def get_object_predicates(self, info):
-        pass
+    def append_chat(self, message, role="user", is_reset=False):
+        if is_reset:
+            self.gpt_interface_pddl.reset_message()
+        self.gpt_interface_pddl.add_message(role=role, content=message, image_url=False)
 
-    def goal_state_encoding(self, message):
-        prompt = """# Object 1
-bin1 = Object(
-    index=0,
-    name='white box',
-    location=(516, 201),
-    size=(238, 334),
-    color='white',
-    object_type='box',
-    is_elastic=True,
-    is_rigid=True,
-    in_bin=True
-)
-
-# Object 2
-object2 = Object(
-    index=1,
-    name='yellow object',
-    location=(280, 134),
-    size=(227, 221),
-    color='yellow',
-    object_type='object',
-    is_foldable=True,
-    out_bin=True
-)
-
-# Object 3
-object3 = Object(
-    index=2,
-    name='black object',
-    location=(79, 275),
-    size=(151, 113),
-    color='black',
-    object_type='object',
-    is_rigid=True,
-    out_bin=True,
-    is_black=True
-)
-
-# Object 4
-object4 = Object(
-    index=3,
-    name='brown object',
-    location=(503, 205),
-    size=(147, 153),
-    color='brown',
-    object_type='object',
-    is_rigid=True,
-    is_elastic=True,
-    in_bin=True
-)
-
-# Object 5
-object5 = Object(
-    index=4,
-    name='blue object',
-    location=(223, 209),
-    size=(355, 244),
-    color='blue',
-    object_type='object',
-    is_soft=True,
-    out_bin=True
-)\n
-"""
-        prompt += "This is a initial state of bin_packing task. \n"
-        prompt += "We are now doing a bin_packing and our goal is listed below. \n\n"
-
-        goal_prompt = self.task_data["goal"]
-        prompt += str(goal_prompt)
-        prompt += "\nUsing init state and natural instruction of goal, make a goal state represented as a python script. \n"
-        print(prompt)
-        self.gpt_interface_pddl.reset_message()
-        self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
+    def run_chat(self):
         answer = self.gpt_interface_pddl.run_prompt()
-        print("-"*90)
-        print(answer)
-
-    def init_state_encoding(self):
-        pass
-
-
-
+        return answer

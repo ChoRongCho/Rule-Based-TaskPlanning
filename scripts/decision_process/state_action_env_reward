@@ -1,0 +1,19 @@
+State
+1. object
+    init state
+
+
+
+
+    target goal state
+
+
+
+2. env
+
+
+
+action rule + goal constraint + init_state
+1. planning 순서
+2. planning goal state
+3.

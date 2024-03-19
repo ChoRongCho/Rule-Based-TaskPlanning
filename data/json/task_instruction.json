@@ -1,7 +1,11 @@
 {
   "bin_packing": {
     "script": {
-      "task_description": "packing yellow, blue, brown objects into the box called bin, not a black object. "
+      "task_description": "packing objects into the bin",
+      "rule_and_goal": {
+        "rule": "give conditions to the actions",
+        "goal": "the objective of the task"
+      }
     },
     "instructions" : {
     "rule0": "you should never pick and place a box",
@@ -10,14 +14,14 @@
     "rule3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted",
     "rule4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object"
     },
-    "instructions_sample1" : {
+    "instructions1" : {
     "rule0": "don't pick and place a box called bin",
     "rule1": "when place a rigid objects in the bin, the soft objects must be in the bin",
-    "rule2": "when fold a object, the fragile object must be in the bin ",
-    "rule3": "when a rigid object in the bin at the initial state, out the rigid object and replace it into the bin ",
+    "rule2": "when fold a foldable object, the fragile object must be in the bin ",
+    "rule3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin ",
     "rule4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object"
     },
-    "instructions_sample2" : {
+    "instructions2" : {
     "rule0": "you should never pick and place a box",
     "rule1": "before place a elastic object, push a elastic object ",
     "rule2": "do not place a fragile object if there is no elastic object in the bin",
@@ -25,8 +29,15 @@
     },
     "goal": {
       "goal1": "packing all objects into the bin",
-      "goal2": "if there is a black object, don't packing it",
-      "goal3": ""
+      "goal2": "if there is a black object, don't pack it into the box"
+    },
+    "goal1": {
+      "goal1": "packing all objects into the bin",
+      "goal2": "if there is a elastic object, don't pack it into the box"
+    },
+    "goal2": {
+      "goal1": "packing all objects into the bin",
+      "goal2": "if there is a yellow object, don't pack it into the box"
     }
   },
 
