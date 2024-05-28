@@ -23,10 +23,8 @@ class PythonPlanner(ChangminPlanner):
         output, error = process.communicate()
         if error:  # robot action re-definition
             planning_output = output.decode('utf-8') + "\n" + error.decode('utf-8')
-
         else:
             planning_output = output.decode('utf-8') + "\n"
-
         if self.is_save:
             file_path = os.path.join(self.result_dir, "planning_result.txt")
             with open(file_path, "w") as file:
@@ -35,5 +33,5 @@ class PythonPlanner(ChangminPlanner):
         return planning_output
 
     def feedback(self):
-        for i in range(3):
+        for i in range(2):
             self.planning_feedback()

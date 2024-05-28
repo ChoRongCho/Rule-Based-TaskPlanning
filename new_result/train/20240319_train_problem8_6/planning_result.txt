@@ -1,0 +1,14 @@
+Out black object from white box
+Place black object out of the box
+Pick yellow object
+Place yellow object in white box
+
+Traceback (most recent call last):
+  File "/home/changmin/PycharmProjects/GPT_examples/new_result/train/20240319_train_problem8_6/planning.py", line 240, in <module>
+    robot.push(object1)
+  File "/home/changmin/PycharmProjects/GPT_examples/new_result/train/20240319_train_problem8_6/planning.py", line 98, in push
+    if not self.robot_handempty or obj.is_fragile or obj.is_rigid:
+                                                     ^^^^^^^^^^^^
+AttributeError: 'Object' object has no attribute 'is_rigid'
+
+

@@ -58,3 +58,22 @@ class FindObjects:
             self.detected_object.update({index: {phrase: [int((x1 + x2) / 2), int((y1 + y2) / 2), x2 - x1, y2 - y1]}})
         return self.detected_object, frame
 
+
+def main():
+    obj_num = 1
+    action_num = 0
+
+    name = f"action_obj{obj_num}_{action_num}.png"
+    image_path = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/action_dataset/" + name
+    result_dir = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/action_dataset"
+    text_query = ["blue object, robot gripper"]
+
+    detect_obj = FindObjects()
+    detect_obj.modifying_text_prompt(text_query)
+    detected_obj, anno_image = detect_obj.get_bbox(image_path, result_dir)
+    print(detected_obj)
+    cv2.imwrite(os.path.join(result_dir, f"annotated_{name}"), anno_image)
+
+
+if __name__ == '__main__':
+    main()

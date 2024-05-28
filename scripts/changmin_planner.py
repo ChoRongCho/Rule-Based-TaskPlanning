@@ -12,11 +12,11 @@ from scripts.temp_robot.robot_predicates_prove import RobotProve
 from scripts.utils.prompt_function import PromptSet
 from scripts.utils.utils import parse_input
 from scripts.visual_interpreting.visual_interpreter import FindObjects
+from scripts.utils.models import WorldDomain
 
 
 class ChangminPlanner:
     def __init__(self, args):
-        self.args = args
 
         # task and experiment setting
         self.task = args.task_name
@@ -33,7 +33,7 @@ class ChangminPlanner:
 
         # additional path
         self.result_dir = os.path.join(args.result_dir, self.exp_name)
-        self.input_image = os.path.join(self.data_dir, self.task, args.input_image)
+        self.domain_image = os.path.join(self.data_dir, self.task, args.input_image)
 
         # json_dir
         self.api_json = os.path.join(self.json_dir, args.api_json)
@@ -70,6 +70,10 @@ class ChangminPlanner:
         self.robot = RobotProve(name=self.robot_data["name"],
                                 goal=self.robot_data["goal"],
                                 actions=self.robot_data["actions"])
+
+        # init state, goal state, def_table
+        self.world_model = WorldDomain
+        self.state = {}
         self.print_args()
 
     def print_args(self):
@@ -80,7 +84,8 @@ class ChangminPlanner:
                       ["API JSON", self.args.api_json],
                       ["Example Prompt", self.args.example_prompt_json],
                       ["Max Predicates", self.args.max_predicates]]
-        print(tabulate(self.table))
+        # print(tabulate(self.table))
+        self.robot.print_definition_of_predicates()
 
     def check_result_folder(self):
         if not os.path.exists(self.result_dir):
@@ -106,7 +111,7 @@ class ChangminPlanner:
         self.gpt_interface_vision.reset_message()
         prompt = self.load_prompt.load_prompt_detect_object()
         self.gpt_interface_vision.add_example_prompt("observation_message")
-        self.gpt_interface_vision.add_message(role="user", content=prompt, image_url=self.input_image)
+        self.gpt_interface_vision.add_message(role="user", content=prompt, image_url=self.domain_image)
         for i in range(self.patience_repeat):
             try:
                 answer = self.gpt_interface_vision.run_prompt()
@@ -128,7 +133,7 @@ class ChangminPlanner:
         """
         result_dict, result_list = self.prompt_detect_object()
         self.grounding_dino.modifying_text_prompt(result_list)
-        detected_object, self.anno_image = self.grounding_dino.get_bbox(self.input_image, self.result_dir)
+        detected_object, self.anno_image = self.grounding_dino.get_bbox(self.domain_image, self.result_dir)
         return detected_object, result_dict
 
     def get_active_predicates(self, detected_object, random_mode=True):
@@ -142,8 +147,8 @@ class ChangminPlanner:
                       2: {'yellow object': [83, 158, 135, 216]},
                       3: {'brown object': [257, 95, 139, 148]}}
         :return: 
-        active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
-        detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}        
+    active_predicates = ['is_fragile', 'is_foldable', 'is_soft', 'is_elastic', 'is_rigid']
+    detected_object_predicates = {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}
         """
         if random_mode:
             detected_object_predicates = {}
@@ -153,9 +158,10 @@ class ChangminPlanner:
 
         else:  # Do robot active prove
             detected_object_predicates = {}
-            for index, info in detected_object.items():
+            for index, info in detected_object.items():  # info: {'white box': [509, 210, 231, 323]}
                 info = self.robot.get_object_predicates(info)
                 detected_object_predicates.update({index: info})
+        # final return: {0: ['is_elastic'], 1: ['is_fragile', 'is_rigid'], 2: ['is_foldable'], 3: ['is_soft']}
 
         # Removing duplicate predicates.
         tempt_list = list(detected_object_predicates.values())
@@ -163,6 +169,12 @@ class ChangminPlanner:
         active_predicates = list(set(flattened_list))
 
         return active_predicates, detected_object_predicates
+
+    def temp_get_obj_predicates(self):
+        push_img, fold_img, pull_img = self.robot.identifying_properties()
+        self.gpt_interface_vision.add_message(role="system", content=self.robot.database.system_message)
+        self.gpt_interface_vision.add_message(role="user")
+
 
     def get_predicates(self, detected_object, detected_object_types, active_predicates):
         """
@@ -241,7 +253,7 @@ class ChangminPlanner:
 
         return init_state_python_code, init_state_table
 
-    def goal_state_encoding(self, init_state_table):
+    def get_goal_state(self, init_state_table):
         self.gpt_interface_pddl.reset_message()
 
         # get example message1
@@ -250,14 +262,17 @@ class ChangminPlanner:
                                                           self.task_data["instructions"])
 
         # add example and prompt
-        self.gpt_interface_pddl.add_example_prompt("goal_encoding")
+        self.gpt_interface_pddl.add_example_prompt("goal_message")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
 
         # run prompt
         goal_state = self.gpt_interface_pddl.run_prompt()
         self.question.append(prompt)
         self.answer.append(goal_state)
-        return goal_state
+
+        # split a text
+        goal_state_description, goal_state_table = goal_state.split("Table")
+        return goal_state_description, goal_state_table
 
     def planning_from_domain(self,
                              object_class_python_script,
@@ -284,26 +299,35 @@ class ChangminPlanner:
         return planning_python_script
 
     def make_plan(self):
+        # first, load domain model
+
+        # Detect Object and make action predicates for objects
         detected_object, detected_object_types = self.detect_object()
         active_predicates, detected_object_predicates = self.get_active_predicates(detected_object=detected_object)
+
+        # integrate objects physical predicates to other predicates
         object_class_python_script = self.get_predicates(detected_object=detected_object,
                                                          detected_object_types=detected_object_types,
                                                          active_predicates=active_predicates)
+        # make robot action conditions
         robot_class_python_script = self.get_robot_action_conditions(object_class_python_script)
         init_state_python_script, init_state_table = self.get_init_state(detected_object=detected_object,
                                                                          do_types=detected_object_types,
                                                                          do_predicates=detected_object_predicates,
                                                                          oc_python_script=object_class_python_script)
-        goal_state = self.goal_state_encoding(init_state_table=init_state_table)
-
+        # simple goal state description
+        _, goal_state_table = self.get_goal_state(init_state_table=init_state_table)
+        
+        # All result
         planning_python_script = self.planning_from_domain(object_class_python_script=object_class_python_script,
                                                            robot_class_python_script=robot_class_python_script,
                                                            init_state_python_script=init_state_python_script,
                                                            init_state_table=init_state_table,
-                                                           goal_state_table=goal_state)
-
+                                                           goal_state_table=goal_state_table)
+        # world model + init model
         if self.is_save:
             self.log_answer()
+            self.state_parsing(init_state_table, goal_state_table)
             file_path = os.path.join(self.result_dir, "planning.py")
             with open(file_path, "w") as file:
                 file.write(str(object_class_python_script) + "\n\n")
@@ -323,13 +347,14 @@ class ChangminPlanner:
             file.write("\n")
             file.write("-" * 50 + "\n")
             for q, a in zip(self.question, self.answer):
+                file.write("Q: ")
                 file.write(q + "\n\n")
+                file.write("A: \n")
                 file.write(a + "\n")
-                file.write("-" * 50 + "\n")
+                file.write("--" * 50 + "\n\n")
             file.close()
 
     def planning_feedback(self):
-
         # robot_actions = self.robot_data["actions"]
         # task_instructions = self.task_data["instructions"]
 
@@ -348,23 +373,28 @@ class ChangminPlanner:
         output, error = process.communicate()
         if error:  # robot action re-definition
             planning_output = output.decode('utf-8') + "\n" + error.decode('utf-8')
-            prompt, new_planning = self.robot_action_feedback(python_script=content, planning_output=planning_output)
+            new_planning = self.robot_action_feedback(python_script=content, planning_output=planning_output)
             new_plan = self.replace_string(content, new_planning, "def")
-            print(planning_output, "\n")
-            print(new_planning)
-            print("-" * 90)
 
         else:
             planning_output = output.decode('utf-8') + "\n"
-            prompt, new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
+            new_planning = self.direct_planner_feedback(python_script=content, planning_output=planning_output)
+            """
+            1. No error in syntax
+            2. goal state error in this part
+            
+            use python planner validator
+            """
             new_plan = new_planning
-            print(new_plan)
-            print("-" * 90)
 
         if self.is_save:
             new_file_path = os.path.join(self.result_dir, f"planning_{self.planning_repeat}.py")
+            planning_result_path = os.path.join(self.result_dir, f"planning_result_{self.planning_repeat}.txt")
             with open(new_file_path, "w") as file:
                 file.write(str(new_plan) + "\n\n")
+                file.close()
+            with open(planning_result_path, "w") as file:
+                file.write(planning_output)
                 file.close()
 
     def robot_action_feedback(self, python_script, planning_output):
@@ -374,7 +404,7 @@ class ChangminPlanner:
         self.gpt_interface_pddl.add_example_prompt("robot_feedback")
         self.gpt_interface_pddl.add_message(role="user", content=prompt, image_url=False)
         robot_action_feedback = self.gpt_interface_pddl.run_prompt()
-        return prompt, robot_action_feedback
+        return robot_action_feedback
 
     def direct_planner_feedback(self, python_script, planning_output):
         self.gpt_interface_pddl.reset_message()
@@ -402,16 +432,20 @@ class ChangminPlanner:
         middle = replace_part
         after = content[end_index:]
 
-        replaced_script = before + middle + "\n\n\t" + after
+        replaced_script = before + middle + "\n\n    " + after
         return replaced_script
 
-    def just_chat(self, message, role="user"):
-
-        self.gpt_interface_pddl.reset_message()
-        self.gpt_interface_pddl.add_message(role=role, content=message, image_url=False)
-        answer = self.gpt_interface_pddl.run_prompt()
-
-        return answer
+    def just_chat(self, message, role="user", image_url=False):
+        if not image_url:
+            self.gpt_interface_pddl.reset_message()
+            self.gpt_interface_pddl.add_message(role=role, content=message, image_url=False)
+            answer = self.gpt_interface_pddl.run_prompt()
+            return answer
+        else:
+            self.gpt_interface_vision.reset_message()
+            self.gpt_interface_vision.add_message(role=role, content=message, image_url=image_url)
+            answer = self.gpt_interface_vision.run_prompt()
+            return answer
 
     def append_chat(self, message, role="user", is_reset=False):
         if is_reset:
@@ -421,3 +455,34 @@ class ChangminPlanner:
     def run_chat(self):
         answer = self.gpt_interface_pddl.run_prompt()
         return answer
+
+    def state_parsing(self, init_state_table, goal_state_table):
+        json_state_path = os.path.join(self.result_dir, "state.json")
+
+        def parse_state(state_str):
+            state_dict = {}
+            lines = state_str.strip().split('\n')
+            header = [x.strip() for x in lines[1].strip('|').split('|')]
+
+            for line in lines[3:]:
+                data = [x.strip() for x in line.strip('|').split('|')]
+                item_name = data[header.index('item')].strip()
+                if "--" in item_name:
+                    break
+                state_dict[item_name] = {}
+                for i, field in enumerate(header):
+                    if field != 'item':
+                        state_dict[item_name][field] = data[i].strip()
+            return state_dict
+
+        init_state = parse_state(init_state_table)
+        goal_state = parse_state(goal_state_table)
+
+        self.state = {
+            "init_state": init_state,
+            "goal_state": goal_state
+        }
+
+        with open(json_state_path, "w") as file:
+            json.dump(self.state, file, indent=4)
+            file.close()

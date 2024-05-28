@@ -1,5 +1,7 @@
+import os
+import os.path
 import random
-import yaml
+import time
 
 # from scripts.pddl_planner import PDDLPlanner
 from scripts.python_planner import PythonPlanner
@@ -9,233 +11,168 @@ from scripts.utils.utils import parse_args_v2
 def main():
     args = parse_args_v2()
     image_number = 8
-    exp_number = 6
-    args.exp_name = f"20240319_train_problem{image_number}_{exp_number}"
+    exp_number = 8
+    args.exp_name = f"20240418_train_problem{image_number}_{exp_number}"
     args.input_image = f"train/problem{image_number}.jpg"
     args.max_predicates = random.randint(1, 6)
 
     # make plan
     planner = PythonPlanner(args=args)
-    planner.plan()
-    # planner.feedback()
-
-
-def main2():
-    args = parse_args_v2()
-    image_number = 7
-    exp_number = 1
-    args.exp_name = f"20240314_train_problem{image_number}_{exp_number}"
-    args.input_image = f"train/problem{image_number}.jpg"
-    args.max_predicates = random.randint(1, 6)
-
-    # make plan
-    planner = PythonPlanner(args=args)
-
-    message = """
-from dataclasses import dataclass
-
-@dataclass
-class Object:
-    # Basic dataclass
-    index: int
-    name: str
-    location: tuple
-    size: tuple
-    color: str or bool
-    object_type: str
-
-    # Object physical properties predicates
-    is_elastic: bool = False
-    is_foldable: bool = False
-    is_rigid: bool = False
-    is_soft: bool = False
-    is_fragile: bool = False
-
-    # bin_packing Predicates (max 3)
-    in_bin: bool = False
-    out_bin: bool = False
-    is_bigger_than_bin: bool = False
-
-class Robot:
-    # Define skills
-    def __init__(self,
-                 name: str = "UR5",
-                 goal: str = None,
-                 actions: dict = None):
-        self.name = name
-        self.goal = goal
-        self.actions = actions
-
-        self.robot_handempty = True
-        self.robot_now_holding = False
-        self.robot_base_pose = True
-
-        # new state for bin_packing
-        self.is_soft_in_bin = False
-
-    # basic state
-    def state_handempty(self):
-        self.robot_handempty = True
-        self.robot_base_pose = False
-
-    # basic state
-    def state_holding(self, objects):
-        self.robot_handempty = False
-        self.robot_now_holding = objects
-        self.robot_base_pose = False
-
-    # basic state
-    def state_base(self):
-        self.robot_base_pose = True
-
-    # bin_packing
-    def pick(self, obj):
-        if obj.in_bin or obj.object_type == 'box':
-            print(f"Cannot pick a {obj.name} in the bin or a box.")
-        else:
-            print(f"Pick {obj.name}")
-            self.state_holding(obj)
-            obj.out_bin = True
-            obj.in_bin = False
-
-    # bin_packing
-    def place(self, obj, bins):
-        if self.robot_now_holding != obj or obj.object_type == 'box':
-            print(f"Cannot place a {obj.name} not in hand or a box.")
-        elif bins:
-            # place an object in the bin
-            if obj.is_fragile and not self.is_soft_in_bin:
-                print(f"Cannot place a {obj.name} without the soft object in the box. ")
-            else:
-                print(f"Place {obj.name} in {bins.name}")
-                self.state_handempty()
-                obj.in_bin = True
-                obj.out_bin = False
-                if obj.is_soft:
-                    self.is_soft_in_bin = True
-        else:
-            # place an object out of the bin
-            print(f"Place {obj.name} out of the box")
-            self.state_handempty()
-            obj.in_bin = False
-            obj.out_bin = True
-
-    # bin_packing
-    def push(self, obj):
-        if not self.robot_handempty or obj.is_fragile or obj.is_rigid:
-            print(f"Cannot push a {obj.name} when hand is not empty or the object is fragile or rigid.")
-        elif obj.is_soft and obj.in_bin:
-            print(f"Push {obj.name}")
-
-    # bin_packing
-    def fold(self, obj):
-        if not self.robot_handempty or not obj.is_foldable:
-            print(f"Cannot fold a {obj.name} when hand is not empty or the object is not foldable.")
-        else:
-            print(f"Fold {obj.name}")
-
-    # bin_packing
-    def out(self, obj, bins):
-        if not obj.in_bin:
-            print(f"Cannot pick a {obj.name} not in the bin.")
-        else:
-            print(f"Out {obj.name} from {bins.name}")
-            self.state_holding(obj)
-            obj.in_bin = False
-            obj.out_bin = True
-
-# Object 1
-object1 = Object(
-    index=0,
-    name='yellow object',
-    location=(89, 136),
-    size=(156, 154),
-    color='yellow',
-    object_type='object',
-    is_rigid=True,
-    out_bin=True
-)
-
-# Object 2
-object2 = Object(
-    index=1,
-    name='blue object',
-    location=(203, 278),
-    size=(156, 150),
-    color='blue',
-    object_type='object',
-    is_elastic=True,
-    is_soft=True,
-    out_bin=True
-)
-
-# Bin
-bin1 = Object(
-    index=2,
-    name='white box',
-    location=(498, 218),
-    size=(249, 353),
-    color='white',
-    object_type='box',
-    is_rigid=True,
-    is_foldable=True,
-    in_bin=True
-)
-
-# Object 3
-object3 = Object(
-    index=3,
-    name='black object',
-    location=(294, 150),
-    size=(147, 123),
-    color='black',
-    object_type='object',
-    is_elastic=True,
-    out_bin=True
-)
-
-if __name__ == '__main__':
-	# packing all object in the box
-	# make a plan
-Your goal is packing objects into the bin. 
-You must follow the rule: 
-
-{'pick': 'pick an {object} not in the {bin}',
-'place': 'place an {object} on the {anywhere}',
-'push': 'push an {object} downward in the bin, hand must be empty when pushing',
-'fold': 'fold an {object}, hand must be empty when folding',
-'out': 'pick an {object} in {bin}'}
-
-{'rule0': 'you should never pick and place a box', 
-'rule1': 'when place a fragile objects, the soft objects must be in the bin', 
-'rule2': 'when fold a object, the object must be foldable', 
-'rule3': 'when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted', 
-'rule4': 'you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object'}
-
-Make a plan under the if __name__ == '__main__':. 
-make init state to goal state using actions
-|-------------------------------------Init-State-----------------------------------|
-| item    | name             | in_bin | out_bin | is_soft |  is_rigid | is_elastic |
-|----------------------------------------------------------------------------------|
-| object1 | yellow object    | False  | True    | False   |  True     | False      |
-| object2 | blue object      | False  | True    | True    |  False    | True       |
-| bin1    | white box        | None   | None    | None    |  None     | None       |
-| object3 | black object     | False  | True    | False   |  False    | True       |
-|----------------------------------------------------------------------------------|
-
-|------------------------Goal-State------------------------|
-| item    | name          | in_bin | out_bin | soft_pushed |
-|----------------------------------------------------------|
-| object1 | yellow object | True   | False   | False       |
-| bin1    | white box     | None   | None    | None        |
-| object2 | blue object   | True   | False   | True        |
-| object3 | black object  | False  | True    | False       |
-|----------------------------------------------------------|
+    content = f"""This table defines the physical properties of the object we are investigating.
+Answer the questions below in accordance with this criterion.
 """
-    planner.append_chat(message=message, is_reset=True)
-    answer = planner.run_chat()
+    content += "\nThe first image shows before the robot presses an unknown object. " + \
+               "The second image shows after the robot presses an object. Does this object have soft properties?" + \
+               "Answer with the template below \nAnswer: \nReason: "
+
+    role = "user"
+    print(content)
+    image_dir = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/my_data/obj1_side"
+    image_url1 = os.path.join(image_dir, "Capture_obj1_frame671.jpg")
+    image_url2 = os.path.join(image_dir, "Capture_obj1_frame901.jpg")
+    image_url = [image_url1, image_url2]
+    answer = planner.just_chat(message=content, role=role, image_url=image_url)
     print(answer)
 
 
+def list_file(directory):
+    entries = os.listdir(directory)
+    files = [os.path.join(directory, entry) for entry in entries if os.path.isfile(os.path.join(directory, entry))]
+    return files
+
+
+def sort_files(file_list):
+    # 키워드와 우선순위 매핑
+    keyword_order = {
+        'base': 0,
+        'push': 1,
+        'fold': 2,
+        'pull': 3
+    }
+
+    # 파일명에서 키워드 추출 및 정렬
+    def get_keyword(file_name):
+        for keyword in keyword_order:
+            if keyword in file_name:
+                return keyword_order[keyword], file_name
+        return len(keyword_order), file_name  # 키워드가 없으면 마지막에 정렬
+
+    # 파일 목록 정렬
+    sorted_files = sorted(file_list, key=get_keyword)
+    return sorted_files
+
+
+def temp3():
+    for obj_num in range(2, 3):
+        root = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{obj_num}"
+        data_path = list_file(root)
+        data_path = sort_files(data_path)
+
+        i, j, k = False, False, False
+        # push image
+        for data_name in data_path:
+            if "push" in data_name:
+                i = True
+                continue
+            if "fold" in data_name:
+                j = True
+                continue
+            if "pull" in data_name:
+                k = True
+                continue
+
+        system_message = f"You're working to verify the object's properties through images." + \
+                         f"This table defines the physical properties of the object we are investigating." + \
+                         f"Answer the questions below in accordance with this criterion. \n"
+        system_message += """
+---------------  -------------------------------------------------------
+Predicates List  Definition
+is_fragile       the fact of tending to break or be damaged easily
+is_rigid         the fact of being very strict and difficult to change
+is_soft          the quality of changing shape easily when pressed
+is_foldable      the ability to bend without breaking
+is_elastic       the quality of returning to its original size and shape
+---------------  -------------------------------------------------------
+"""
+        args = parse_args_v2()
+        image_number = 8
+        exp_number = 8
+        args.exp_name = f"20240418_train_problem{image_number}_{exp_number}"
+        args.input_image = f"train/problem{image_number}.jpg"
+        args.max_predicates = random.randint(1, 6)
+        #
+        # # make plan
+        planner = PythonPlanner(args=args)
+        prompt = planner.load_prompt.load_verification_module([i, j, k])
+        print("-" * 90)
+        print(data_path)
+        planner.gpt_interface_vision.reset_message()
+        planner.gpt_interface_vision.add_message(role="system", content=system_message, image_url=False)
+        planner.gpt_interface_vision.add_message(role="user", content=prompt, image_url=data_path)
+
+        start_time = time.time()
+        ans = planner.gpt_interface_vision.run_prompt()
+        end_time = time.time()
+        print(ans)
+        print(f"time: {end_time - start_time} s ")
+
+
+def temp2():
+    """
+    obj3: soft, not foldable elastic
+    :return:
+    """
+    for num in range(1, 9):
+        im1 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{num}/obj{num}_side_base_image.jpg"
+        im2 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{num}/obj{num}_top_base_image.jpg"
+        args = parse_args_v2()
+        image_number = 8
+        exp_number = 8
+        args.exp_name = f"20240418_train_problem{image_number}_{exp_number}"
+        args.input_image = f"train/problem{image_number}.jpg"
+        args.max_predicates = random.randint(1, 6)
+
+        # prompt
+        system_message = "You are a vision AI that describes the shape and color of an object. " + \
+                         "You should look at a picture of a given object and explain its size and color."
+        prompt = "The first image is when you see the object from the side " + \
+                 "and the next image is when you see the object from the top. \n" + \
+                 "Define the shape and color of the object through this image. \n" + \
+                 "Use the simple classification table below for the shape of the object. \n" + \
+                 """
+-----  ----------------------------------------------             
+Shape  Examples
+1D     linear or ring
+2D     flat rectangle, circle, etc
+3D     cube, cuboid, cylinder, cone, polyhedron, etc
+-----  ----------------------------------------------
+
+Please answer with the template below:
+
+Answer
+Object Name: color_dimension_shape object
+*Example: white_3D_cube object
+
+Descriptions about object
+*your descriptions in 300 words
+
+"""
+
+        # make plan
+        planner = PythonPlanner(args=args)
+        # print(system_message)
+        # print(prompt)
+        planner.gpt_interface_vision.reset_message()
+        planner.gpt_interface_vision.add_message(role="system", content=system_message, image_url=False)
+        planner.gpt_interface_vision.add_message(role="user", content=prompt, image_url=[im1, im2])
+
+        start_time = time.time()
+        ans = planner.gpt_interface_vision.run_prompt()
+        end_time = time.time()
+        print(ans)
+        print(f"time: {end_time - start_time} s ")
+        print("-"*50)
+
+
 if __name__ == '__main__':
-    main()
+    temp2()

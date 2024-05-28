@@ -1,4 +1,5 @@
 from typing import List
+from scripts.utils.utils import int_to_ordinal
 
 
 class PromptSet:
@@ -134,7 +135,6 @@ class Robot:
                              goal_state_table,
                              robot_action,
                              task_instruction):
-
         prompt = f"{object_class_python_script}\n\n"
         prompt += f"{robot_class_python_script}\n\n"
         prompt += f"{init_state_python_script}\n\n"
@@ -189,6 +189,58 @@ class Robot:
         prompt += "And, this is rules that when you do actions. \n"
         prompt += f"{task_instruction}\n"
         prompt += f"Create and return a goal state of objects for {self.task}. \n"
+        return prompt
+
+    def load_verification_module(self, available_actions: list[bool]):
+        """
+        prompt: base image
+        m1: push
+        m2: fold
+        m3: pull
+        m4: make template
+        :param available_actions:
+        :return:
+        """
+        n = 1
+        prompt = "\nThe first image is a original image of object. Please refer to this image and answer. \n\n"
+        end_message = f"""Please answer with the template below:  
+
+Answer
+**rigid: True or False
+**soft: True or False
+**foldable: True or False
+**elastic: True or False
+
+Reason:
+-Describe a object and feel free to write down your reasons in less than 300 words
+
+"""
+        if available_actions[0]:  # push
+            m1 = "We will show the image when the robot does the action 'push' on the object." + \
+                 f"\nThe {int_to_ordinal(n + 1)} image is just before the robot pushes the object. \n" + \
+                 f"The {int_to_ordinal(n + 2)} image is the image when the robot is pushing the object. \n" + \
+                 f"If there is a significant deformation in the shape of the object, the object is soft, else it is rigid. " + \
+                 f"Does this object have soft or rigid properties? \n\n"
+            n += 2
+            prompt += m1
+
+        if available_actions[1]:  # fold
+            m2 = "We will show the image when the robot does the action 'fold' on the object." + \
+                 f"\nThe {int_to_ordinal(n + 1)} image shows the robot just before it grabs an object. \n" + \
+                 f"The {int_to_ordinal(n + 2)} image is after it is completely folded. \n" + \
+                 f"The {int_to_ordinal(n + 3)} image shows after the robot leaves it hand on the object. \n" + \
+                 f"If the end of the robot gripper that holds the object touches on the opposite side of the object, the object can be folded or elastic. " + \
+                 f"When the robot lets go of the object, if the object return to its original shape, the object is elastic, else foldable" + \
+                 f"Does this object have foldable or elastic or None properties? \n\n"
+            n += 3
+            prompt += m2
+        if available_actions[2]:  # pull
+            m3 = "We will show the image when the robot does the action 'pull' on the object." + \
+                 f"\nThe {int_to_ordinal(n + 1)} image shows before the robot pulls an unknown object. \n" + \
+                 f"The {int_to_ordinal(n + 2)} image shows while the robot pulls an object. Does this object have elastic properties? \n"
+            n += 2
+            prompt += m3
+        prompt += end_message
         return prompt
 
 
@@ -255,7 +307,6 @@ class PromptSetPDDL:
                                  task_instruction):
         prompt = ""
         return prompt
-
 
     def load_prompt_planning(self,
                              object_class_python_script,

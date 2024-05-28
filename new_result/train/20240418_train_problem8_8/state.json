@@ -1,0 +1,81 @@
+{
+    "init_state": {
+        "bin1": {
+            "name": "white box",
+            "in_bin": "None",
+            "out_bin": "None",
+            "is_soft": "None",
+            "is_foldable": "None",
+            "is_rigid": "None"
+        },
+        "object1": {
+            "name": "yellow object",
+            "in_bin": "False",
+            "out_bin": "True",
+            "is_soft": "True",
+            "is_foldable": "False",
+            "is_rigid": "False"
+        },
+        "object2": {
+            "name": "blue object",
+            "in_bin": "False",
+            "out_bin": "True",
+            "is_soft": "False",
+            "is_foldable": "True",
+            "is_rigid": "True"
+        },
+        "object3": {
+            "name": "black object",
+            "in_bin": "True",
+            "out_bin": "False",
+            "is_soft": "False",
+            "is_foldable": "True",
+            "is_rigid": "True"
+        },
+        "object4": {
+            "name": "brown object",
+            "in_bin": "True",
+            "out_bin": "False",
+            "is_soft": "False",
+            "is_foldable": "True",
+            "is_rigid": "True"
+        }
+    },
+    "goal_state": {
+        "bin1": {
+            "name": "white box",
+            "in_bin": "None",
+            "out_bin": "None",
+            "foldable_folded": "None",
+            "soft_pushed": "None"
+        },
+        "object1": {
+            "name": "yellow object",
+            "in_bin": "True",
+            "out_bin": "False",
+            "foldable_folded": "False",
+            "soft_pushed": "True"
+        },
+        "object2": {
+            "name": "blue object",
+            "in_bin": "True",
+            "out_bin": "False",
+            "foldable_folded": "True",
+            "soft_pushed": "False"
+        },
+        "object3": {
+            "name": "black object",
+            "in_bin": "False",
+            "out_bin": "True",
+            "foldable_folded": "False",
+            "soft_pushed": "False"
+        },
+        "object4": {
+            "name": "brown object",
+            "in_bin": "True",
+            "out_bin": "False",
+            "foldable_folded": "True",
+            "soft_pushed": "False"
+        }
+    }
+}

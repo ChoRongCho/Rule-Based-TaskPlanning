@@ -1,5 +1,9 @@
 import random
 
+import numpy as np
+from tabulate import tabulate
+from scripts.predicates_prove.robot_database import Database
+
 
 class Robot:
     # Define skills
@@ -20,6 +24,19 @@ class Robot:
                                        "is_soft",
                                        "is_foldable",
                                        "is_elastic"]
+
+        self.def_table = [["Predicates List", "Definition"],
+                          [self.active_predicates_list[0], "the fact of tending to break or be damaged easily"],
+                          [self.active_predicates_list[1], "the fact of being very strict and difficult to change"],
+                          [self.active_predicates_list[2], "the quality of changing shape easily when pressed"],
+                          [self.active_predicates_list[3], "the ability to bend easily without breaking"],
+                          [self.active_predicates_list[4], "the quality of returning to its original size and shape"]]
+
+        self.database = Database(self.def_table)
+
+    def print_definition_of_predicates(self):
+        # print(tabulate(tabular_data=self.def_table, headers="firstrow", tablefmt="psql"))
+        return tabulate(self.def_table)
 
     # basic state
     def state_handempty(self):

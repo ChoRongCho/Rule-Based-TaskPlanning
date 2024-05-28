@@ -1,0 +1,11 @@
+Out black object from white box
+Place black object out of the box
+Pick yellow object
+Cannot place a yellow object without the soft object in the box. 
+Cannot fold a yellow object when hand is not empty or the object is not foldable.
+Hand is full. Cannot pick a blue object.
+Cannot place a blue object not in hand or a box.
+Cannot push a brown object when hand is not empty or the object is fragile or rigid.
+
+
+

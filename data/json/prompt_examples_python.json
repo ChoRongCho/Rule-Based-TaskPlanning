@@ -4,7 +4,7 @@
       {
         "index": 0,
         "role": "system",
-        "content": "You are a good assistant. You must answer in the following format.",
+        "content": "You are a good assistant. You must answer in the following format. ",
         "image_path": false
       },
       {
@@ -165,7 +165,7 @@
         "image_path": false
       }
     ],
-    "goal_encoding": [
+    "goal_message": [
       {
         "index": 0,
         "role": "system",
@@ -181,19 +181,19 @@
       {
         "index": 2,
         "role": "assistant",
-        "content": "Goal-State by rule\nrule0: None\nrule1: None (it indicates the order of the action => dose not affect the goal state)\nrule2: foldable object => folded\nrule3 & rule4: soft object => pushed\n\nGoal-State by instructions\ngoal1: packing all objects\ngoal2: black object: don't pack\n\nFrom a given init state and rules, we can define the goal state of the task. \n|---------------------------------Goal-State---------------------------------|\n| item    | name          | in_bin | out_bin | foldable_folded | soft_pushed |\n|----------------------------------------------------------------------------|\n| bin1    | white box     | None   | None    | None            | None        |\n| object2 | yellow object | True   | False   | True            | False       |\n| object3 | black object  | False  | True    | False           | False       |\n| object4 | brown object  | True   | False   | False           | False       |\n| object5 | blue object   | True   | False   | False           | False       |\n|----------------------------------------------------------------------------|\n",
+        "content": "Description: \nGoal-State by rule\nrule0: None\nrule1: None (it indicates the order of the action => dose not affect the goal state)\nrule2: foldable object => folded\nrule3 & rule4: soft object => pushed\n\nGoal-State by instructions\ngoal1: packing all objects\ngoal2: black object: don't pack\n\nFrom a given init state and rules, we can define the goal state of the task.\n\nTable \n|---------------------------------Goal-State---------------------------------|\n| item    | name          | in_bin | out_bin | foldable_folded | soft_pushed |\n|----------------------------------------------------------------------------|\n| bin1    | white box     | None   | None    | None            | None        |\n| object2 | yellow object | True   | False   | True            | False       |\n| object3 | black object  | False  | True    | False           | False       |\n| object4 | brown object  | True   | False   | False           | False       |\n| object5 | blue object   | True   | False   | False           | False       |\n|----------------------------------------------------------------------------|\n",
         "image_path": false
       },
       {
-        "index": 1,
+        "index": 3,
         "role": "user",
         "content": "|------------------------------------Init-State------------------------------------|\n| item    | name          | in_bin | out_bin | is_soft | is_foldable | is_fragile |\n|----------------------------------------------------------------------------------|\n| object0 | yellow object | False  | True    | False   | False       | True       |\n| bin1    | white box     | None   | None    | None    | None        | None       |\n| object2 | black object  | True   | False   | False   | True        | True       |\n| object3 | blue object   | False  | True    | False   | False       | True       |\n|----------------------------------------------------------------------------------|\n\nThis is a initial state of bin_packing task. \nWe are now doing a bin_packing and our goal is listed below. \n\n{'goal1': 'packing all objects into the bin', 'goal2': \"if there is a black object, don't pack it into the box\"}\n\nAnd, this is rules that when you do actions. \n{'rule0': 'you should never pick and place a box', 'rule1': 'when place a fragile objects, the soft objects must be in the bin', 'rule2': 'when fold a object, the object must be foldable', 'rule3': 'when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted', 'rule4': 'you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the object'}\nCreate and return a goal state of objects for bin_packing. \n",
         "image_path": false
       },
       {
-        "index": 2,
+        "index": 4,
         "role": "assistant",
-        "content": "Goal-State by rule\nrule0: None\nrule1: None (it indicates the order of the action => dose not affect the goal state)\nrule2: foldable object => folded\nrule3 & rule4: soft object => pushed\n\nGoal-State by instructions\ngoal1: packing all objects\ngoal2: black object: don't pack\n\nFrom a given init state and rules, we can define the goal state of the task. \n|---------------------------------Goal-State---------------------------------|\n| item    | name          | in_bin | out_bin | foldable_folded | soft_pushed |\n|----------------------------------------------------------------------------|\n| bin1    | white box     | None   | None    | None            | None        |\n| object2 | yellow object | True   | False   | True            | False       |\n| object3 | black object  | False  | True    | False           | False       |\n| object4 | brown object  | True   | False   | False           | False       |\n| object5 | blue object   | True   | False   | False           | False       |\n|----------------------------------------------------------------------------|\n",
+        "content": "Description: \nGoal-State by rule\nrule0: None\nrule1: None (it indicates the order of the action => dose not affect the goal state)\nrule2: foldable object => folded\nrule3 & rule4: soft object => pushed\n\nGoal-State by instructions\ngoal1: packing all objects\ngoal2: black object: don't pack\n\nFrom a given init state and rules, we can define the goal state of the task.\n\nTable \n|---------------------------------Goal-State---------------------------------|\n| item    | name          | in_bin | out_bin | foldable_folded | soft_pushed |\n|----------------------------------------------------------------------------|\n| bin1    | white box     | None   | None    | None            | None        |\n| object2 | yellow object | True   | False   | True            | False       |\n| object3 | black object  | False  | True    | False           | False       |\n| object4 | brown object  | True   | False   | False           | False       |\n| object5 | blue object   | True   | False   | False           | False       |\n|----------------------------------------------------------------------------|\n",
         "image_path": false
       }
     ],
