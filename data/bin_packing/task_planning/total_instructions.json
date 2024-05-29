@@ -1,0 +1,343 @@
+{
+    "instance1": {
+        "goal": {
+            "1": "Packing all items into the box."
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "when fold a object, the object must be foldable",
+            "3": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin ",
+            "4": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+        }
+    },
+    "instance2": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a yellow object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+        }
+    },
+    "instance3": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a 1D object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "when fold a object, the object must be foldable",
+            "4": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin "
+        }
+    },
+    "instance4": {
+        "goal": {
+            "1": "Packing all items into the box.",
+            "2": "If there are yellow object and black object together, don't pack a black object into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    },
+    "instance5": {
+        "goal": {
+            "1": "Fitting all belongings into the bin",
+            "2": "If there is a elastic object, don't pack it into the box",
+            "3": "If there is a fragile object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "do not place a fragile object if there is no elastic object in the bin"
+        }
+    },
+    "instance6": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a 1D object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when fold a foldable object, the fragile object must be in the bin ",
+            "3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    },
+    "instance7": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a white and soft object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "when fold a foldable object, the fragile object must be in the bin ",
+            "3": "before place a elastic object, push a elastic object first",
+            "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    },
+    "instance8": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a rigid object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "do not place a fragile object if there is no elastic object in the bin"
+        }
+    },
+    "instance9": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a black object, don't pack it into the box",
+            "3": "If there is a white and soft object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when fold a object, the object must be foldable",
+            "3": "before place a elastic object, push a elastic object first",
+            "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    },
+    "instance10": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a red object, don't pack it into the box",
+            "3": "If there is a elastic object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when fold a object, the object must be foldable",
+            "3": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "4": "do not place a fragile object if there is no elastic object in the bin"
+        }
+    },
+    "instance11": {
+        "goal": {
+            "1": "Storing all objects in the container."
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "when fold a foldable object, the fragile object must be in the bin ",
+            "3": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance12": {
+        "goal": {
+            "1": "Fitting all belongings into the bin",
+            "2": "If there is a 1D object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when fold a foldable object, the fragile object must be in the bin ",
+            "4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance13": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a red object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when fold a object, the object must be foldable",
+            "4": "when place a fragile objects, the soft objects must be in the bin"
+        }
+    },
+    "instance14": {
+        "goal": {
+            "1": "Storing all objects in the container.",
+            "2": "If there is a elastic object, don't pack it into the box",
+            "3": "If there is a black object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+        }
+    },
+    "instance15": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a white and soft object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    },
+    "instance16": {
+        "goal": {
+            "1": "Fitting all belongings into the bin",
+            "2": "If there is a red object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when fold a object, the object must be foldable",
+            "3": "when place a fragile objects, the soft objects must be in the bin",
+            "4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance17": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there are yellow object and black object together, don't pack a black object into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin "
+        }
+    },
+    "instance18": {
+        "goal": {
+            "1": "packing all objects into the bin"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin "
+        }
+    },
+    "instance19": {
+        "goal": {
+            "1": "Storing all objects in the container."
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "when place a fragile objects, the soft objects must be in the bin",
+            "4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance20": {
+        "goal": {
+            "1": "Fitting all belongings into the bin",
+            "2": "If there is a yellow object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "before place a elastic object, push a elastic object first",
+            "4": "when place a fragile objects, the soft objects must be in the bin"
+        }
+    },
+    "instance21": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there are yellow object and black object together, don't pack a black object into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when fold a object, the object must be foldable"
+        }
+    },
+    "instance22": {
+        "goal": {
+            "1": "Fitting all belongings into the bin"
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "when fold a foldable object, the fragile object must be in the bin ",
+            "3": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance23": {
+        "goal": {
+            "1": "packing all objects into the bin"
+        },
+        "rule": {
+            "1": "avoid handling and moving any box",
+            "2": "when fold a object, the object must be foldable",
+            "3": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+        }
+    },
+    "instance24": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a white and soft object, don't pack it into the box",
+            "3": "If there are yellow object and black object together, don't pack a black object into the box"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin ",
+            "4": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+        }
+    },
+    "instance25": {
+        "goal": {
+            "1": "Fitting all belongings into the bin"
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when fold a foldable object, the fragile object must be in the bin ",
+            "3": "before place a elastic object, push a elastic object first",
+            "4": "when place a fragile objects, the soft objects must be in the bin"
+        }
+    },
+    "instance26": {
+        "goal": {
+            "1": "Packing all items into the box."
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "before place a elastic object, push a elastic object first",
+            "3": "do not place a fragile object if there is no elastic object in the bin",
+            "4": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+        }
+    },
+    "instance27": {
+        "goal": {
+            "1": "Storing all objects in the container."
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when fold a object, the object must be foldable",
+            "3": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin "
+        }
+    },
+    "instance28": {
+        "goal": {
+            "1": "packing all objects into the bin",
+            "2": "If there is a fragile object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "it is prohibited to lift and relocate a container",
+            "2": "when fold a object, the object must be foldable",
+            "3": "before place a elastic object, push a elastic object first",
+            "4": "when place a fragile objects, the soft objects must be in the bin"
+        }
+    },
+    "instance29": {
+        "goal": {
+            "1": "Packing all items into the box."
+        },
+        "rule": {
+            "1": "don't pick and place a box called bin",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "do not place a fragile object if there is no elastic object in the bin"
+        }
+    },
+    "instance30": {
+        "goal": {
+            "1": "Fitting all belongings into the bin",
+            "2": "If there is a fragile object, don't pack it into the box"
+        },
+        "rule": {
+            "1": "you should never pick and place a box",
+            "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+            "3": "when fold a object, the object must be foldable",
+            "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+        }
+    }
+}

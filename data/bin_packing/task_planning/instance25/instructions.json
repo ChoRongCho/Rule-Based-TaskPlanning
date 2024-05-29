@@ -1,0 +1,12 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Fitting all belongings into the bin"
+    },
+    "rules": {
+        "1": "don't pick and place a box called bin",
+        "2": "when fold a foldable object, the fragile object must be in the bin ",
+        "3": "before place a elastic object, push a elastic object first",
+        "4": "when place a fragile objects, the soft objects must be in the bin"
+    }
+}

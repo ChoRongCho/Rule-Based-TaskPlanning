@@ -1,0 +1,13 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Packing all items into the box.",
+        "2": "If there are yellow object and black object together, don't pack a black object into the box"
+    },
+    "rules": {
+        "1": "it is prohibited to lift and relocate a container",
+        "2": "before place a elastic object, push a elastic object first",
+        "3": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+        "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+    }
+}

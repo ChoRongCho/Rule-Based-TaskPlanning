@@ -1,0 +1,13 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "packing all objects into the bin",
+        "2": "If there is a fragile object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "it is prohibited to lift and relocate a container",
+        "2": "when fold a object, the object must be foldable",
+        "3": "before place a elastic object, push a elastic object first",
+        "4": "when place a fragile objects, the soft objects must be in the bin"
+    }
+}

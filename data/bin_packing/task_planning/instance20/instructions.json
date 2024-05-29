@@ -1,0 +1,13 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Fitting all belongings into the bin",
+        "2": "If there is a yellow object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "you should never pick and place a box",
+        "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+        "3": "before place a elastic object, push a elastic object first",
+        "4": "when place a fragile objects, the soft objects must be in the bin"
+    }
+}

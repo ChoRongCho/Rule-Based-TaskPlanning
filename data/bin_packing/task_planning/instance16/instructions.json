@@ -1,0 +1,13 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Fitting all belongings into the bin",
+        "2": "If there is a red object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "it is prohibited to lift and relocate a container",
+        "2": "when fold a object, the object must be foldable",
+        "3": "when place a fragile objects, the soft objects must be in the bin",
+        "4": "you must push a soft object to make more space in the bin, however, if there is a fragile object on the soft object, you must not push the objectwhen push a object, neither fragile and rigid objects are permitted"
+    }
+}

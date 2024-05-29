@@ -9,6 +9,30 @@ from scripts.utils.utils import parse_args_v2
 
 
 def main():
+    """
+    --task_name
+    bin_packing
+
+    --exp_name
+    packing_all
+
+    --input_image
+    problem1.jpg
+
+    --api_json
+    setting.json
+
+    --example_prompt_json
+    prompt_examples_python.json
+
+    --robot_json
+    robot.json
+
+    --task_json
+    task_instruction.json
+    :return:
+    """
+
     args = parse_args_v2()
     image_number = 8
     exp_number = 8
@@ -27,7 +51,7 @@ Answer the questions below in accordance with this criterion.
 
     role = "user"
     print(content)
-    image_dir = "/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/my_data/obj1_side"
+    image_dir = "/data/bin_packing/property_search_database/my_data/obj1_side"
     image_url1 = os.path.join(image_dir, "Capture_obj1_frame671.jpg")
     image_url2 = os.path.join(image_dir, "Capture_obj1_frame901.jpg")
     image_url = [image_url1, image_url2]
@@ -64,7 +88,7 @@ def sort_files(file_list):
 
 def temp3():
     for obj_num in range(2, 3):
-        root = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{obj_num}"
+        root = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search_database/obj{obj_num}"
         data_path = list_file(root)
         data_path = sort_files(data_path)
 
@@ -123,8 +147,8 @@ def temp2():
     :return:
     """
     for num in range(1, 9):
-        im1 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{num}/obj{num}_side_base_image.jpg"
-        im2 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search/obj{num}/obj{num}_top_base_image.jpg"
+        im1 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search_database/obj{num}/obj{num}_side_base_image.jpg"
+        im2 = f"/home/changmin/PycharmProjects/GPT_examples/data/bin_packing/property_search_database/obj{num}/obj{num}_top_base_image.jpg"
         args = parse_args_v2()
         image_number = 8
         exp_number = 8

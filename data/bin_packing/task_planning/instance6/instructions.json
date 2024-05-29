@@ -1,0 +1,12 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Storing all objects in the container.",
+        "2": "If there is a 1D object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "don't pick and place a box called bin",
+        "2": "when fold a foldable object, the fragile object must be in the bin ",
+        "3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+    }
+}

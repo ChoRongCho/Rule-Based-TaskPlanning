@@ -1,0 +1,13 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Fitting all belongings into the bin",
+        "2": "If there is a elastic object, don't pack it into the box",
+        "3": "If there is a fragile object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "you should never pick and place a box",
+        "2": "before place a elastic object, push a elastic object first",
+        "3": "do not place a fragile object if there is no elastic object in the bin"
+    }
+}

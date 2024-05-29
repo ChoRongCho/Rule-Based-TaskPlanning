@@ -1,0 +1,12 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "packing all objects into the bin",
+        "2": "If there is a white and soft object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "it is prohibited to lift and relocate a container",
+        "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+        "3": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+    }
+}

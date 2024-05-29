@@ -1,0 +1,12 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Packing all items into the box."
+    },
+    "rules": {
+        "1": "avoid handling and moving any box",
+        "2": "when fold a object, the object must be foldable",
+        "3": "when a soft object in the bin at the initial state, out of the soft object and replace it into the bin ",
+        "4": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+    }
+}

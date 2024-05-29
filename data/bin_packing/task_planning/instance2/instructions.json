@@ -1,0 +1,12 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Storing all objects in the container.",
+        "2": "If there is a yellow object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "it is prohibited to lift and relocate a container",
+        "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+        "3": "when push a object, neither fragile and rigid objects are permitted, but only soft objects are permitted"
+    }
+}

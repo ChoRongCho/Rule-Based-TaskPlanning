@@ -1,0 +1,14 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "packing all objects into the bin",
+        "2": "If there is a black object, don't pack it into the box",
+        "3": "If there is a white and soft object, don't pack it into the box"
+    },
+    "rules": {
+        "1": "don't pick and place a box called bin",
+        "2": "when fold a object, the object must be foldable",
+        "3": "before place a elastic object, push a elastic object first",
+        "4": "when a rigid object in the bin at the initial state, out of the rigid object and replace it into the bin "
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "task": "bin_packing",
+    "goals": {
+        "1": "Packing all items into the box."
+    },
+    "rules": {
+        "1": "don't pick and place a box called bin",
+        "2": "when place a rigid objects in the bin, the soft objects must be in the bin before",
+        "3": "do not place a fragile object if there is no elastic object in the bin"
+    }
+}
