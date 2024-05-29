@@ -1,8 +1,8 @@
 {
     "task": "bin_packing",
     "goals": {
-        "1": "",
-        "2": "",
+        "1": "packing all objects into the bin",
+        "2": "if there is a black object, don't pack it into the box",
         "3": "",
         "4": ""
     },
